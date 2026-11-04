@@ -19,5 +19,6 @@ class MainActivity: FlutterActivity() {
     
     override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+        ReliabilityChannel(this, flutterEngine.dartExecutor.binaryMessenger)
     }
 }

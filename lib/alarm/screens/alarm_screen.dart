@@ -16,6 +16,7 @@ import 'package:clock_app/common/widgets/list/persistent_list_view.dart';
 import 'package:clock_app/navigation/types/quick_action_controller.dart';
 import 'package:clock_app/settings/data/settings_schema.dart';
 import 'package:clock_app/settings/types/setting.dart';
+import 'package:clock_app/system/screens/reliability_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
@@ -254,7 +255,9 @@ class _AlarmScreenState extends State<AlarmScreen> {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        PersistentListView<Alarm>(
+        Column(children: [
+          const ReliabilityBanner(),
+          Expanded(child: PersistentListView<Alarm>(
           saveTag: 'alarms',
           listController: _listController,
           itemBuilder: (alarm) => AlarmCard(
@@ -285,7 +288,8 @@ class _AlarmScreenState extends State<AlarmScreen> {
           listFilters: _getListFilterItems(),
           customActions: _getCustomActions(),
           sortOptions: _showSort.value ? alarmSortOptions : [],
-        ),
+        )),
+        ]),
         FAB(
           onPressed: handleAddAlarmActon,
         ),

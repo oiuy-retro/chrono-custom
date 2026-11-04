@@ -30,8 +30,18 @@ This file lists every change compared with upstream Chrono, with the files invol
 - The alarm settings schema (`lib/alarm/data/alarm_settings_schema.dart`) is unchanged, so saved alarms and backups are compatible with upstream 0.6.0.
 - `lib/alarm/screens/alarm_screen.dart`: the add button and the "Add alarm" launcher shortcut open this screen directly with the current time.
 
+### Alarm reliability setup
+- New `android/app/src/main/kotlin/com/vicolo/chrono/ReliabilityChannel.kt`, registered in `MainActivity.kt`, on the method channel `com.vicolo.chrono/reliability`. `getStatus` returns the Android version, `Build.MANUFACTURER`, and: notifications enabled, `AlarmManager.canScheduleExactAlarms()` (Android 12+), `NotificationManager.canUseFullScreenIntent()` (Android 14+), `PowerManager.isIgnoringBatteryOptimizations()`, and `PackageManager.isAutoRevokeWhitelisted` (Android 11+). `open` starts the matching settings screen. Every intent is tried in a list with try/catch and falls back to App info and then the main Settings screen, so a missing screen never crashes the app.
+- Intents used: app notification settings; `ACTION_REQUEST_SCHEDULE_EXACT_ALARM`; `android.settings.MANAGE_APP_USE_FULL_SCREEN_INTENT`; `ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` then `ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS`; `Intent.ACTION_AUTO_REVOKE_PERMISSIONS`. For Samsung "Never sleeping apps": `com.samsung.android.lool` / `com.samsung.android.sm` / `com.samsung.android.sm_cn` battery activities, then `ACTION_POWER_USAGE_SUMMARY`. For Samsung "Unrestricted": App info.
+- The manifest already declared `USE_EXACT_ALARM` and `SCHEDULE_EXACT_ALARM` upstream, so on Android 13 and newer exact alarms are normally allowed already. The app does not use "display over other apps", so that permission is not requested.
+- New `lib/system/logic/reliability.dart`: status model, the ordered item list, Done ticks and the "shown once" flag (stored with GetStorage). Notification permission is requested with `permission_handler` first and falls back to the settings screen.
+- New `lib/system/screens/reliability_screen.dart`: the screen (refreshes on resume; "Fix all" works through a queue, one item per return to the app) and the Alarm tab banner.
+- `lib/navigation/screens/nav_scaffold.dart`: opens the screen once on first launch.
+- `lib/alarm/screens/alarm_screen.dart`: shows the banner above the alarm list.
+- `lib/settings/data/general_settings_schema.dart`: "Alarm reliability setup" entry at the top of Reliability. Defaults for "Show Foreground Notification" and "useBackgroundService" changed from off to on. Saved values are kept, so this only affects new installs. The alarm audio channel default was already "Alarm" upstream, and boot handling and full-screen alarms are always on (they have no setting).
+
 ### Text
-- `lib/l10n/app_en.arb`: new English strings `alarmRingsInHeader`, `allAlarmsOffHeader`, `repeatSection`, `advancedSection`, `advancedSectionDescription`, `dismissTaskSection`, `dismissTaskSectionDescription`. The file was rewritten by a script, which also normalised some spacing; no existing text changed.
+- `lib/l10n/app_en.arb`: new English strings `alarmRingsInHeader`, `allAlarmsOffHeader`, `repeatSection`, `advancedSection`, `advancedSectionDescription`, `dismissTaskSection`, `dismissTaskSectionDescription`, and the `reliability*` strings for the setup screen. The file was rewritten by a script, which also normalised some spacing; no existing text changed.
 
 ### Theme
 - `lib/theme/data/default_style_themes.dart`: the default "Paper" style has a corner radius of 24 instead of 16. Existing installs keep their saved style.
@@ -41,8 +51,9 @@ This file lists every change compared with upstream Chrono, with the files invol
 - `android/keystore.properties.example`: template for the signing file.
 - `android/settings.gradle`: adds `com.android.tools:r8:8.3.37` to the settings build script classpath. The D8 bundled with Android Gradle Plugin 7.4.2 fails with a NullPointerException on libraries compiled with JDK 21 (AndroidX lifecycle 2.8.x, tsbackgroundfetch 4.1.1).
 - `android/gradle.properties`: Gradle heap raised from 1.5 GB to 4 GB.
-- `pubspec.yaml`: version `0.6.0-custom.1+28`; `path_provider_platform_interface` and `plugin_platform_interface` added as dev dependencies for the screenshot test.
+- `pubspec.yaml`: version `0.6.0-custom.1+29`; `path_provider_platform_interface` and `plugin_platform_interface` added as dev dependencies for the screenshot test.
 - `.gitignore`: signing files and `test/screenshots/goldens/`.
 
 ## Tests
-- New `test/screenshots/redesign_screenshots_test.dart`.
+- New `test/screenshots/redesign_screenshots_test.dart` (also renders the reliability screen).
+- New `test/system/reliability_test.dart`: item list per Android version and maker, Samsung title, and the Fix all order.

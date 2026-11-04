@@ -2,7 +2,16 @@
 
 All changes in this custom build. Upstream changes are listed in the [upstream repository](https://github.com/vicolo-dev/chrono/releases).
 
-## 0.6.0-custom.1 (unreleased, pre-release build)
+## 0.6.0-custom.1, versionCode 29 (pre-release 2)
+
+Alarm reliability:
+- New "Alarm reliability" screen ("Set up for Samsung" on Samsung phones) with a live status and a Fix button for: notifications, alarms and reminders (exact alarms, Android 12+), full-screen alerts (Android 14+), battery optimization, and keeping permissions when the app is unused (Android 11+). On Samsung it adds two manual items with a Done tick: battery usage set to Unrestricted, and Never sleeping apps / Put unused apps to sleep.
+- "Fix all" opens each unmet item in turn and re-checks the status when you return to the app.
+- The screen opens once on first launch, a banner on the Alarm tab links to it while anything is not OK, and Settings, General, Reliability has an "Alarm reliability setup" entry.
+- New installs have "Show foreground notification" and "Use background service" on by default. Saved settings are unchanged.
+- versionCode raised to 29.
+
+## 0.6.0-custom.1, versionCode 28 (pre-release 1)
 
 Based on upstream commit `9e30f243271a27e79573e2b2d3da10159419eb8e` (v0.6.0 plus four commits).
 

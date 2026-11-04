@@ -21,6 +21,8 @@ import 'package:clock_app/settings/types/setting.dart';
 import 'package:clock_app/system/logic/handle_intents.dart';
 import 'package:clock_app/system/logic/quick_actions.dart';
 import 'package:clock_app/theme/types/theme_extension.dart';
+import 'package:clock_app/system/logic/reliability.dart';
+import 'package:clock_app/system/screens/reliability_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -233,6 +235,16 @@ class _NavScaffoldState extends State<NavScaffold> {
     _selectedTabIndex = widget.initialTabIndex;
 
     _updateForegroundNotification(showForegroundSetting.value);
+
+    // Open the reliability setup once, on the first launch after install.
+    if (!reliabilityService.wasSetupShown) {
+      SchedulerBinding.instance.addPostFrameCallback((_) async {
+        await reliabilityService.markSetupShown();
+        if (!mounted) return;
+        Navigator.push(context,
+            MaterialPageRoute(builder: (context) => const ReliabilityScreen()));
+      });
+    }
 
     alarmListRevision.addListener(_onAlarmListChanged);
     ListenerManager.addOnChangeListener("alarms", _onAlarmListChanged);

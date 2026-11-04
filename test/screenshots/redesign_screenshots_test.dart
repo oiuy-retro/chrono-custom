@@ -12,6 +12,8 @@ import 'package:clock_app/common/types/time.dart';
 import 'package:clock_app/common/widgets/card_container.dart';
 import 'package:clock_app/icons/flux_icons.dart';
 import 'package:clock_app/navigation/widgets/large_header.dart';
+import 'package:clock_app/system/logic/reliability.dart';
+import 'package:clock_app/system/screens/reliability_screen.dart';
 import 'package:clock_app/theme/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -166,6 +168,14 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
   }, skip: !enabled);
 
+  testWidgets('reliability setup screen', (tester) async {
+    await shoot(
+        tester,
+        _app(ReliabilityScreen(service: _ShotReliabilityService())),
+        'reliability_setup',
+        size: const Size(412, 1250));
+  }, skip: !enabled);
+
   test('editor places every alarm setting', () {
     // Sanity check that the schema still has the sections the editor uses.
     final alarm = Alarm(const Time(hour: 7, minute: 30));
@@ -177,4 +187,19 @@ void main() {
     expect(s.getSetting("Tasks"), isNotNull);
     expect(s.getSetting("Tags"), isNotNull);
   });
+}
+
+class _ShotReliabilityService extends ReliabilityService {
+  @override
+  Future<ReliabilityStatus> getStatus() async => const ReliabilityStatus(
+        sdk: 34,
+        manufacturer: "samsung",
+        notifications: true,
+        exactAlarms: true,
+        fullScreenIntent: false,
+        batteryOptimization: false,
+        autoRevoke: true,
+      );
+  @override
+  bool isManualDone(String id) => id == samsungAppBatteryItem;
 }
