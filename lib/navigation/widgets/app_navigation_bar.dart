@@ -43,7 +43,7 @@ class _AppNavigationBarState extends State<AppNavigationBar> {
           selectedItemColor: Theme.of(context).colorScheme.primary,
           unselectedItemColor:
               Theme.of(context).colorScheme.onBackground.withOpacity(0.6),
-          showUnselectedLabels: false,
+          showUnselectedLabels: true,
           selectedLabelStyle: Theme.of(context).textTheme.titleSmall,
           unselectedLabelStyle: Theme.of(context).textTheme.titleSmall,
           iconSize: 24,

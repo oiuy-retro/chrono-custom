@@ -25,10 +25,17 @@ if (flutterVersionName == null) {
     flutterVersionName = '1.0'
 }
 
+// Release signing. The properties file is never committed. Its location is
+// taken from the CHRONO_KEYSTORE_PROPERTIES environment variable, or
+// android/keystore.properties if the variable is not set. See
+// android/keystore.properties.example and docs/BUILDING.md.
 def keystoreProperties = new Properties()
-def keystorePropertiesFile = rootProject.file('key.properties')
-if (keystorePropertiesFile.exists()) {
-    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+def keystorePropertiesPath = System.getenv('CHRONO_KEYSTORE_PROPERTIES')
+def keystorePropertiesFile = keystorePropertiesPath != null ?
+        new File(keystorePropertiesPath) : rootProject.file('keystore.properties')
+def hasReleaseKeystore = keystorePropertiesFile.exists()
+if (hasReleaseKeystore) {
+    keystorePropertiesFile.withInputStream { keystoreProperties.load(it) }
 }
 
 android {
@@ -52,7 +59,9 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.vicolo.chrono"
+        // Different from upstream (com.vicolo.chrono) so this build installs
+        // alongside the official app.
+        applicationId "com.oiuyretro.chrono"
         minSdkVersion 21
         targetSdkVersion flutter.targetSdkVersion
         versionCode flutterVersionCode.toInteger()  
@@ -61,16 +70,20 @@ android {
     }
     signingConfigs {
         release {
-            keyAlias keystoreProperties['keyAlias']
-            keyPassword keystoreProperties['keyPassword']
-            storeFile = file('release-key.jks')
-            storePassword keystoreProperties['storePassword']        
+            if (hasReleaseKeystore) {
+                keyAlias keystoreProperties['keyAlias']
+                keyPassword keystoreProperties['keyPassword']
+                storeFile file(keystoreProperties['storeFile'])
+                storePassword keystoreProperties['storePassword']
+            }
         }
     }
 
     buildTypes {
         release {
-            signingConfig signingConfigs.release
+            // Without a keystore.properties file the release APK is left
+            // unsigned rather than signed with the debug key.
+            signingConfig hasReleaseKeystore ? signingConfigs.release : null
 
             minifyEnabled true
             shrinkResources true
@@ -94,12 +107,12 @@ android {
     productFlavors {
       prod {
         dimension "app"
-        resValue "string", "app_name", "Chrono"
+        resValue "string", "app_name", "Chrono Custom"
       }
 
       dev {
         dimension "app"
-        resValue "string", "app_name", "Chrono Dev"
+        resValue "string", "app_name", "Chrono Custom Dev"
         // versionNameSuffix "-dev",
         applicationIdSuffix ".dev"
       }

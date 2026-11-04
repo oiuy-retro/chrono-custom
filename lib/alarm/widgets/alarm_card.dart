@@ -136,93 +136,82 @@ class _AlarmCardState extends State<AlarmCard> {
       );
     }
 
+    final Color mutedColor = colorScheme.onSurface.withOpacity(0.5);
+    final Color secondaryColor = widget.alarm.isEnabled
+        ? colorScheme.onSurface.withOpacity(0.7)
+        : mutedColor;
+    final String scheduleText = getAlarmScheduleDescription(
+        context, widget.alarm, dateFormat, timeFormat);
+
+    // Layout: big time on the left (iOS), label and schedule underneath,
+    // a clear on/off switch on the right (One UI), and the overflow menu.
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      padding: const EdgeInsets.only(left: 20.0, right: 4.0, top: 14, bottom: 14),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Expanded(
-            flex: 999,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (widget.alarm.label.isNotEmpty)
-                    Text(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                DigitalClockDisplay(
+                    dateTime: widget.alarm.time.toDateTime(),
+                    scale: 0.85,
+                    color: widget.alarm.isEnabled ? null : mutedColor),
+                if (widget.alarm.label.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 2, bottom: 2),
+                    child: Text(
                       widget.alarm.label,
-                      style: textTheme.bodyLarge?.copyWith(
-                        color: widget.alarm.isEnabled
-                            ? colorScheme.onBackground.withOpacity(0.8)
-                            : colorScheme.onBackground.withOpacity(0.6),
-                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       softWrap: false,
+                      style: textTheme.titleSmall?.copyWith(
+                          color: secondaryColor, fontWeight: FontWeight.w600),
                     ),
-                  Row(
-                    children: [
-                      DigitalClockDisplay(
-                          dateTime: widget.alarm.time.toDateTime(),
-                          scale: 0.6,
-                          color: widget.alarm.isEnabled
-                              ? null
-                              : colorScheme.onBackground.withOpacity(0.6)),
-                    ],
                   ),
-                  Row(
-                    children: [
-                      Icon(
-                        timeOfDayIcon.icon,
-                        color: widget.alarm.isEnabled
-                            ? timeOfDayIcon.color
-                            : colorScheme.onBackground.withOpacity(0.6),
-                        size: 24,
+                const SizedBox(height: 2),
+                Row(
+                  children: [
+                    Icon(
+                      timeOfDayIcon.icon,
+                      color: widget.alarm.isEnabled
+                          ? timeOfDayIcon.color
+                          : mutedColor,
+                      size: 18,
+                    ),
+                    const SizedBox(width: 6),
+                    Flexible(
+                      child: Text(
+                        scheduleText,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: textTheme.bodyMedium
+                            ?.copyWith(color: secondaryColor),
                       ),
-                      const SizedBox(width: 8),
-                      Flexible(
-                        child: Text(
-                          getAlarmScheduleDescription(
-                              context, widget.alarm, dateFormat, timeFormat),
-                          maxLines: 2,
-                          style: textTheme.bodyMedium?.copyWith(
-                            color: widget.alarm.isEnabled
-                                ? colorScheme.onBackground.withOpacity(0.8)
-                                : colorScheme.onBackground.withOpacity(0.6),
-                          ),
-                        ),
-                      ),
-                    ],
-                  )
-                ],
-              ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              // const SizedBox(width: 8),
-              getActionButton(),
-              CardEditMenu(actions: [
-                if (widget.alarm.canBeSkipped)
-                  MenuAction(
-                    widget.alarm.shouldSkipNextAlarm
-                        ? AppLocalizations.of(context)!.cancelSkipAlarmButton
-                        : AppLocalizations.of(context)!.skipAlarmButton,
-                    (context) {
-                      if (widget.alarm.shouldSkipNextAlarm) {
-                        widget.onSkipChange(false);
-                      } else {
-                        widget.onSkipChange(true);
-                      }
-                    },
-                    Icons.skip_next_rounded,
-                  ),
-                getDuplicatePopupAction(context, widget.onPressDuplicate),
-                if (widget.alarm.isDeletable)
-                  getDeletePopupAction(context, widget.onPressDelete),
-              ]),
-            ],
-          ),
+          const SizedBox(width: 8),
+          getActionButton(),
+          CardEditMenu(actions: [
+            if (widget.alarm.canBeSkipped)
+              MenuAction(
+                widget.alarm.shouldSkipNextAlarm
+                    ? AppLocalizations.of(context)!.cancelSkipAlarmButton
+                    : AppLocalizations.of(context)!.skipAlarmButton,
+                (context) {
+                  widget.onSkipChange(!widget.alarm.shouldSkipNextAlarm);
+                },
+                Icons.skip_next_rounded,
+              ),
+            getDuplicatePopupAction(context, widget.onPressDuplicate),
+            if (widget.alarm.isDeletable)
+              getDeletePopupAction(context, widget.onPressDelete),
+          ]),
         ],
       ),
     );

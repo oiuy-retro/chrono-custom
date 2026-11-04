@@ -24,6 +24,7 @@ import 'package:clock_app/system/logic/background_service.dart';
 import 'package:clock_app/system/logic/permissions.dart';
 import 'package:clock_app/widgets/logic/update_widgets.dart';
 import 'package:flutter/foundation.dart';
+import 'package:clock_app/system/screens/reliability_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -260,10 +261,24 @@ SettingGroup generalSettingsSchema = SettingGroup(
       "Reliability",
       (context) => AppLocalizations.of(context)!.reliabilitySettingGroup,
       [
+        SettingAction(
+          "Alarm Reliability Setup",
+          (context) => AppLocalizations.of(context)!.reliabilitySettingAction,
+          (context) async {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => const ReliabilityScreen()));
+          },
+          getDescription: (context) => AppLocalizations.of(context)!
+              .reliabilitySettingActionDescription,
+          searchTags: ["reliability", "samsung", "battery", "permissions"],
+        ),
         SwitchSetting(
           "Show Foreground Notification",
           (context) => AppLocalizations.of(context)!.showForegroundNotification,
-          false,
+          true, // Chrono Custom: on by default for new installs
+
           getDescription: (context) => AppLocalizations.of(context)!
               .showForegroundNotificationDescription,
           searchTags: ["foreground", "notification"],
@@ -272,7 +287,8 @@ SettingGroup generalSettingsSchema = SettingGroup(
           "useBackgroundService",
           (context) =>
               AppLocalizations.of(context)!.useBackgroundServiceSetting,
-          false,
+          true, // Chrono Custom: on by default for new installs
+
           getDescription: (context) => AppLocalizations.of(context)!
               .useBackgroundServiceSettingDescription,
           onChange: (context, value) {
