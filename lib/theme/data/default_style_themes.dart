@@ -7,7 +7,7 @@ List<StyleTheme> defaultStyleThemes = [
     shadowOpacity: 0.2,
     shadowBlurRadius: 1,
     shadowSpreadRadius: 0,
-    borderRadius: 16,
+    borderRadius: 24,
     borderWidth: 0,
     isDefault: true,
   ),

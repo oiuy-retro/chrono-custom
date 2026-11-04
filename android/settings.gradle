@@ -17,6 +17,19 @@ pluginManagement {
     }
 }
 
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        // Newer D8/R8 than the one bundled with AGP 7.4.2. The bundled one
+        // crashes ("Error while dexing", NullPointerException) on current
+        // AndroidX lifecycle and tsbackgroundfetch libraries.
+        classpath "com.android.tools:r8:8.3.37"
+    }
+}
+
 plugins {
     id "dev.flutter.flutter-plugin-loader" version "1.0.0"
     id "com.android.application" version "7.4.2" apply false

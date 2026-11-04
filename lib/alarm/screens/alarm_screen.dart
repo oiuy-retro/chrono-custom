@@ -3,20 +3,16 @@ import 'package:clock_app/alarm/data/alarm_sort_options.dart';
 import 'package:clock_app/alarm/logic/new_alarm_snackbar.dart';
 import 'package:clock_app/alarm/types/alarm.dart';
 import 'package:clock_app/alarm/utils/next_alarm.dart';
+import 'package:clock_app/alarm/screens/alarm_editor_screen.dart';
 import 'package:clock_app/alarm/widgets/alarm_card.dart';
-import 'package:clock_app/alarm/widgets/alarm_description.dart';
-import 'package:clock_app/alarm/widgets/alarm_time_picker.dart';
 import 'package:clock_app/audio/logic/ringtones.dart';
 import 'package:clock_app/common/logic/customize_screen.dart';
 import 'package:clock_app/common/types/file_item.dart';
 import 'package:clock_app/common/types/list_filter.dart';
-import 'package:clock_app/common/types/picker_result.dart';
 import 'package:clock_app/common/types/time.dart';
 import 'package:clock_app/common/utils/snackbar.dart';
 import 'package:clock_app/common/widgets/fab.dart';
-import 'package:clock_app/common/widgets/list/customize_list_item_screen.dart';
 import 'package:clock_app/common/widgets/list/persistent_list_view.dart';
-import 'package:clock_app/common/widgets/time_picker.dart';
 import 'package:clock_app/navigation/types/quick_action_controller.dart';
 import 'package:clock_app/settings/data/settings_schema.dart';
 import 'package:clock_app/settings/types/setting.dart';
@@ -95,19 +91,7 @@ class _AlarmScreenState extends State<AlarmScreen> {
   }) async {
     return openCustomizeScreen(
       context,
-      CustomizeListItemScreen(
-        item: alarm,
-        isNewItem: isNewAlarm,
-        headerBuilder: (alarmItem) => Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4.0),
-          child: Column(
-            children: [
-              AlarmTimePicker(alarm: alarmItem),
-              AlarmDescription(alarm: alarmItem),
-            ],
-          ),
-        ),
-      ),
+      AlarmEditorScreen(alarm: alarm, isNewAlarm: isNewAlarm),
       onSave: onSave,
     );
   }
@@ -214,27 +198,13 @@ class _AlarmScreenState extends State<AlarmScreen> {
     return listFilterItems;
   }
 
+  /// Opens the add-alarm screen directly, with the wheel time picker set to
+  /// the current time (as in Samsung Clock and iOS Clock).
   Future<void> _selectTime() async {
-    final PickerResult<TimeOfDay>? timePickerResult =
-        await showTimePickerDialog(
-      context: context,
-      initialTime: TimeOfDay.now(),
-      title: AppLocalizations.of(context)!.selectTime,
-      cancelText: AppLocalizations.of(context)!.cancelButton,
-      confirmText: AppLocalizations.of(context)!.saveButton,
-      useSimple: false,
-    );
-
-    if (timePickerResult != null) {
-      Alarm alarm = Alarm.fromTimeOfDay(timePickerResult.value);
-      if (timePickerResult.isCustomize) {
-        await _openCustomizeAlarmScreen(alarm, onSave: (newAlarm) async {
-          _listController.addItem(newAlarm);
-        }, isNewAlarm: true);
-      } else {
-        _listController.addItem(alarm);
-      }
-    }
+    Alarm alarm = Alarm.fromTimeOfDay(TimeOfDay.now());
+    await _openCustomizeAlarmScreen(alarm, onSave: (newAlarm) async {
+      _listController.addItem(newAlarm);
+    }, isNewAlarm: true);
   }
 
   List<ListFilterCustomAction<Alarm>> _getCustomActions() {
@@ -307,6 +277,7 @@ class _AlarmScreenState extends State<AlarmScreen> {
           reloadOnPop: true,
           onSaveItems: (items) {
             nextAlarm = getNextAlarm();
+            alarmListRevision.value++;
             setState(() {});
           },
           isSelectable: true,

@@ -9,7 +9,11 @@ import 'package:clock_app/icons/flux_icons.dart';
 import 'package:clock_app/navigation/data/tabs.dart';
 import 'package:clock_app/navigation/types/quick_action_controller.dart';
 import 'package:clock_app/navigation/widgets/app_navigation_bar.dart';
-import 'package:clock_app/navigation/widgets/app_top_bar.dart';
+import 'package:clock_app/navigation/widgets/large_header.dart';
+import 'package:clock_app/alarm/utils/next_alarm.dart';
+import 'package:clock_app/settings/types/listener_manager.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:intl/intl.dart';
 import 'package:clock_app/settings/data/general_settings_schema.dart';
 import 'package:clock_app/settings/data/settings_schema.dart';
 import 'package:clock_app/settings/screens/settings_group_screen.dart';
@@ -71,6 +75,65 @@ class _NavScaffoldState extends State<NavScaffold> {
   late StreamSubscription _sub;
   late PageController _controller;
   QuickActionController quickActionController = QuickActionController();
+  final Map<int, double> _scrollOffsets = {};
+  Timer? _headerTimer;
+
+  static const double _expandedHeaderHeight = 152;
+  static const double _collapsedHeaderHeight = 56;
+  static const double _collapseDistance = 96;
+
+  bool _handleScrollNotification(ScrollNotification notification) {
+    if (notification.metrics.axis != Axis.vertical) return false;
+    if (notification is! ScrollUpdateNotification &&
+        notification is! OverscrollNotification) {
+      return false;
+    }
+    final double offset = notification.metrics.pixels
+        .clamp(0.0, _collapseDistance)
+        .toDouble();
+    if ((_scrollOffsets[_selectedTabIndex] ?? 0) != offset) {
+      setState(() {
+        _scrollOffsets[_selectedTabIndex] = offset;
+      });
+    }
+    return false;
+  }
+
+  void _onAlarmListChanged() {
+    if (mounted) setState(() {});
+  }
+
+  String? _getHeaderSubtitle(BuildContext context, String tabId) {
+    final localizations = AppLocalizations.of(context)!;
+    if (tabId == "alarm") {
+      final Alarm? alarm = getNextUpcomingAlarm();
+      if (alarm == null) return localizations.allAlarmsOffHeader;
+      return localizations
+          .alarmRingsInHeader(getRemainingAlarmTimeText(context, alarm));
+    }
+    if (tabId == "clock") {
+      return DateFormat.MMMMEEEEd(Localizations.localeOf(context).toString())
+          .format(DateTime.now());
+    }
+    return null;
+  }
+
+  SystemUiOverlayStyle _overlayStyle(BuildContext context, Color? navColor) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final Color systemNavigationBarColor = navColor ?? colorScheme.background;
+    return SystemUiOverlayStyle(
+      systemNavigationBarColor: systemNavigationBarColor,
+      systemNavigationBarDividerColor: Colors.transparent,
+      systemNavigationBarIconBrightness:
+          systemNavigationBarColor.computeLuminance() > 0.179
+              ? Brightness.dark
+              : Brightness.light,
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: colorScheme.surface.computeLuminance() > 0.179
+          ? Brightness.dark
+          : Brightness.light,
+    );
+  }
 
   void _onTabSelected(int index, [String? tabInitAction]) {
     ScaffoldMessenger.of(context).removeCurrentSnackBar();
@@ -170,6 +233,12 @@ class _NavScaffoldState extends State<NavScaffold> {
     _selectedTabIndex = widget.initialTabIndex;
 
     _updateForegroundNotification(showForegroundSetting.value);
+
+    alarmListRevision.addListener(_onAlarmListChanged);
+    ListenerManager.addOnChangeListener("alarms", _onAlarmListChanged);
+    // Keep the "Alarm in X h Y min" header current.
+    _headerTimer = Timer.periodic(
+        const Duration(seconds: 30), (_) => _onAlarmListChanged());
   }
 
   @override
@@ -177,6 +246,9 @@ class _NavScaffoldState extends State<NavScaffold> {
     swipeActionSetting.removeListener(update);
     showForegroundSetting.removeListener(_updateForegroundNotification);
     _sub.cancel();
+    _headerTimer?.cancel();
+    alarmListRevision.removeListener(_onAlarmListChanged);
+    ListenerManager.removeOnChangeListener("alarms", _onAlarmListChanged);
     _controller.dispose();
     super.dispose();
   }
@@ -198,40 +270,53 @@ class _NavScaffoldState extends State<NavScaffold> {
             .get(Theme.of(context).brightness == Brightness.light ? 96 : 15))
         : colorScheme.surface;
 
+    final double collapse =
+        ((_scrollOffsets[_selectedTabIndex] ?? 0) / _collapseDistance)
+            .clamp(0.0, 1.0);
+    final double headerHeight = MediaQuery.of(context).padding.top +
+        _expandedHeaderHeight -
+        (_expandedHeaderHeight - _collapsedHeaderHeight) * collapse;
+    final Widget settingsButton = IconButton(
+      onPressed: () {
+        ScaffoldMessenger.of(context).removeCurrentSnackBar();
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) =>
+                    SettingGroupScreen(settingGroup: appSettings)));
+      },
+      icon: const Icon(FluxIcons.settings, semanticLabel: "Settings"),
+      color: colorScheme.onSurface.withOpacity(0.8),
+    );
+
     return WithForegroundTask(
       child: Scaffold(
         appBar: orientation == Orientation.portrait
-            ? AppTopBar(
-                titleWidget: Text(
-                  tabs[_selectedTabIndex].title,
-                  style: textTheme.titleMedium?.copyWith(
-                    color: colorScheme.onBackground.withOpacity(0.6),
+            ? PreferredSize(
+                preferredSize: Size.fromHeight(headerHeight),
+                child: AnnotatedRegion<SystemUiOverlayStyle>(
+                  value: _overlayStyle(context,
+                      themeSettings.useMaterialStyle ? materialNavColor : null),
+                  child: SafeArea(
+                    bottom: false,
+                    child: LargeHeader(
+                      title: tabs[_selectedTabIndex].title,
+                      subtitle: _getHeaderSubtitle(
+                          context, tabs[_selectedTabIndex].id),
+                      collapse: collapse,
+                      expandedHeight: _expandedHeaderHeight,
+                      collapsedHeight: _collapsedHeaderHeight,
+                      actions: [settingsButton],
+                    ),
                   ),
                 ),
-                systemNavBarColor:
-                    themeSettings.useMaterialStyle ? materialNavColor : null,
-                actions: [
-                  IconButton(
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).removeCurrentSnackBar();
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => SettingGroupScreen(
-                                  settingGroup: appSettings)));
-                    },
-                    icon: const Icon(FluxIcons.settings,
-                        semanticLabel: "Settings"),
-                    color: colorScheme.onBackground.withOpacity(0.8),
-                  ),
-                ],
               )
             : null,
         bottomNavigationBar: orientation == Orientation.portrait
             ? themeSettings.useMaterialStyle
                 ? NavigationBar(
                     labelBehavior:
-                        NavigationDestinationLabelBehavior.onlyShowSelected,
+                        NavigationDestinationLabelBehavior.alwaysShow,
                     selectedIndex: _selectedTabIndex,
                     backgroundColor: materialNavColor,
                     onDestinationSelected: _onTabSelected,
@@ -282,13 +367,16 @@ class _NavScaffoldState extends State<NavScaffold> {
                   onDestinationSelected: _onTabSelected,
                 ),
               Expanded(
-                child: PageView(
+                child: NotificationListener<ScrollNotification>(
+                  onNotification: _handleScrollNotification,
+                  child: PageView(
                     controller: _controller,
                     onPageChanged: _handlePageViewChanged,
                     physics: swipeActionSetting.value == SwipeAction.cardActions
                         ? const NeverScrollableScrollPhysics()
                         : null,
                     children: tabs.map((tab) => tab.widget).toList()),
+                ),
               ),
             ],
           ),

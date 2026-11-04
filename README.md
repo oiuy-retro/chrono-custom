@@ -1,150 +1,81 @@
-<div align="center">
+# Chrono Custom
 
-<image src="icon.png" height="100"/>
+An Android alarm, world clock, stopwatch and timer app with a redesigned interface that mixes the look of Samsung Clock (One UI) and Apple Clock (iOS).
 
-# Chrono
+> This is an unofficial custom build based on [Chrono](https://github.com/vicolo-dev/chrono) by [Vicolo and its contributors](https://github.com/vicolo-dev/chrono/graphs/contributors), licensed under the [GNU General Public License v3.0](LICENSE). It is not affiliated with or supported by the Chrono developers. Please do not report problems with this build to the upstream project. For a plain description of the original app, see [docs/ABOUT_CHRONO.md](docs/ABOUT_CHRONO.md).
 
-### A modern and powerful clock, alarms, timer and stopwatch app for Android!
-![alt text](cover.png)
+- Upstream base: `vicolo-dev/chrono` branch `master`, commit `9e30f243271a27e79573e2b2d3da10159419eb8e` (four commits after tag `v0.6.0`)
+- App version: `0.6.0-custom.1`, versionCode `28`
+- Application ID: `com.oiuyretro.chrono` (upstream is `com.vicolo.chrono`)
+- Build flavor: `prod`, release build type
+- Change history: [CHANGELOG.md](CHANGELOG.md)
 
-![tests](https://github.com/vicolo-dev/chrono/actions/workflows/tests.yml/badge.svg)
-[![codecov](https://codecov.io/gh/vicolo-dev/chrono/branch/master/graph/badge.svg?token=cKxMm8KVev)](https://codecov.io/gh/vicolo-dev/chrono)
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/7dc1e51c1616482baa5392bc0826c50a)](https://app.codacy.com/gh/vicolo-dev/chrono/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
-<a href="https://hosted.weblate.org/engage/chrono/">
-<img src="https://hosted.weblate.org/widget/chrono/app/svg-badge.svg" alt="Translation status" />
-</a>
-<span class="badge-patreon"><a href="https://patreon.com/vicolo" title="Donate to this project using Patreon"><img src="https://img.shields.io/badge/patreon-donate-orange.svg" alt="Patreon donate button" /></a></span>
+## What's different from upstream
 
-<a href="https://hosted.weblate.org/engage/chrono/">
-<img src="https://hosted.weblate.org/widget/chrono/app/287x66-grey.png" alt="Translation status" />
-</a>
+All upstream features and settings are kept. The changes are to layout and navigation. Details are in [docs/CUSTOM_CHANGES.md](docs/CUSTOM_CHANGES.md).
 
-[<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png" alt="Get it on F-Droid" height="80">](https://f-droid.org/packages/com.vicolo.chrono)
-[<img src="https://gitlab.com/IzzyOnDroid/repo/-/raw/master/assets/IzzyOnDroid.png" alt="Get it on IzzyOnDroid" height=80/>](https://apt.izzysoft.de/fdroid/index/apk/com.vicolo.chrono)
-[<img src="https://i.ibb.co/q0mdc4Z/get-it-on-github.png" alt="Get it on Github" height=80/>](https://github.com/vicolo-dev/chrono/releases/latest)
+### 1. Large collapsing headers
 
+Each tab has a large title at the top. On the Alarm tab it also shows how long until the next alarm (for example "Alarm in 8 hours 12 minutes") or "All alarms are off". On the Clock tab it shows today's date. When you scroll the list, the header shrinks to a normal toolbar.
 
-</div>
+### 2. Bottom navigation
 
+The tabs are in the order Alarm, Clock, Stopwatch, Timer, and every tab always shows its label.
 
-Its usable, but still WIP, so you might encounter some bugs. Make sure to test it out thorougly on your device before using it for critical alarms. Feel free to open an issue.
+### 3. Alarm list
 
-# Table of Content
-- [Features](#features)
-- [Platforms](#platforms)
-- [Contribute](#contribute)
-- [Development](#development)
-- [Todo](#todo)
-- [Screenshots](#screenshots)
+Each alarm shows a large time, then its label and schedule, with the on/off switch on the right. The menu next to the switch still has Skip, Duplicate and Delete.
 
-## Features
-- Modern and easy to use interface
-- Available in variety of [languages](#translations)
-### Alarms
-- Customizable schedules (Daily, Weekly, Specific week days, Specific dates, Date range)
-- Configure melody/ringtone, rising volume and vibrations
-- Configure Snooze length, max snoozes and other snooze behaviour
-- Option to auto delete dismissed alarms and skip alarms
-- Alarm tasks (Math problems, Retype text, Sequence, more to come)
-- Dial, spinner and text time pickers
-- Filter and sort alarms
-- Add tags
-### Clock
-- Customizable clock display
-- World clocks with relative time difference
-- Search and add cities
-### Timer
-- Support for multiple timers
-- Configure melody/ringtone, rising volume and vibrations
-- Timer presets
-- Option to fullscreen a timer
-- Dial and spinner duration pickers
-- Filter and sort timers
-- Add tags
-### Stopwatch
-- Lap history with lap times and elapsed times
-- Lap comparisons (fastest, slowest, average, previous)
-### Appearance
-- Material You icons and themes
-- Highly customizable color themes
-- Highly customizable style themes
-- Other options like animations, nav bar styles, time picker styles
+### 4. Add and edit alarm screen
 
-## Platforms
-Currently, the app is only available for android. I don't have an apple device to develop for iOS, but feel free
-to contribute if you want iOS support. The alarm and timer features
-use android-only code, so that will need to be ported. Everything else should mostly work fine.
+Tapping the add button opens the alarm screen straight away, with a large scroll-wheel time picker at the top. Below it, the settings are grouped into plain sections: Label, Repeat, Sound, Vibration, Snooze and Dismiss task. Less common options (random melody start position, volume while doing a task, snooze rules, tags) are in a collapsed Advanced section. Any alarm setting that is not placed in a named section is added to Advanced automatically, so no setting is hidden.
 
-## Contribute
-All contributions are welcome, whether creating issues, pull requests or translations. 
-### Issues
-Feel free to create issues regarding any issues you might be facing, any improvements or enhancements, or any feature-requests. Try to follow the templates and include as much information as possible in your issues.
-### Pull Requests
-Pull Requests are highly welcome. When contributing to this repository, please first discuss the change you wish to make via an issue. Also, please refer to [Effective Dart](https://dart.dev/effective-dart) as a guideline for the coding standards expected from pull requests.
-### Translations
-You can help translate the app into your preferred language using weblate at https://hosted.weblate.org/projects/chrono/.
+### 5. Installs alongside the official app
 
-<a href="https://hosted.weblate.org/engage/chrono/">
-<img src="https://hosted.weblate.org/widget/chrono/app/287x66-grey.png" alt="Translation status" />
-</a>
+The application ID is `com.oiuyretro.chrono` and the app is named "Chrono Custom", so it can be installed next to the official Chrono. The two apps do not share alarms or settings.
 
-Current progress:
+## Install
 
-<a href="https://hosted.weblate.org/engage/chrono/">
-<img src="https://hosted.weblate.org/widget/chrono/app/horizontal-auto.svg" alt="Translation status" />
-</a>
+1. Download the APK and the `SHA256SUMS` file from the [Releases page](https://github.com/oiuy-retro/chrono-custom/releases).
+2. Check the file: `sha256sum -c SHA256SUMS`
+3. Open the APK on your phone and allow installing from this source when Android asks.
 
-### Spread the word!
-If you found the app useful, you can help the project by sharing it with friends and family.
-### Donate
-The amount of time I can given to the app is bound by financial constraints. Donations will really help allow me in giving more and more time to the development of this app.
+## Run
 
-<span class="badge-patreon"><a href="https://patreon.com/vicolo" title="Donate to this project using Patreon"><img src="https://img.shields.io/badge/patreon-donate-orange.svg" alt="Patreon donate button" /></a></span>
+Open "Chrono Custom" from the app drawer. On first start the app asks for notification and exact alarm permissions. Alarms only ring reliably if you allow them and exclude the app from battery optimization (Settings, General, Reliability).
 
-### Our generous patreons
-- Potato @potatocinna
-- Thorsten @th23x
+## Building from source
 
-## Development
+Short version (full steps in [docs/BUILDING.md](docs/BUILDING.md)):
 
-This app is built using flutter. To start developing:
-1. Follow [this](https://docs.flutter.dev/get-started/install) guide to install flutter and all required tools.
-2. Run the app by `flutter run --flavor dev`. For production builds, use `flutter build apk --release --split-per-abi --flavor prod`.
+1. Install Flutter 3.22.2, JDK 17 and the Android SDK (platform 34).
+2. `flutter pub get`
+3. `flutter analyze` and `flutter test`
+4. Create a release keystore and a `keystore.properties` file outside the repository, using [android/keystore.properties.example](android/keystore.properties.example) as the template.
+5. `CHRONO_KEYSTORE_PROPERTIES=/path/to/keystore.properties flutter build apk --release --flavor prod`
 
-## Todo
-Stuff I would like to do soon™. In no particular order:
-- Alarms
-  - Alarm reliability testing system
-  - Vibration patterns
-  - Alternative time picker interfaces
-  - Array alarms (alarm that will ring after set interval (10 minutes etc.)
-  - More tasks
-- Color schemes
-  - More prebuilt themes  
-  - Filter
-  - Tags
-  - Icon colors
-- Theme
-  - Icon themes
-  - Font themes
-  - System fonts
-- Timer
-  - Alternative duration picker interfaces
-- Widgets
-  - Clock
-  - Clock faces
-  - Alarms
-  - Timers
-  - Stopwatch
-  - Customization
- 
-## Screenshots
-<p float="left">
-<image src="fastlane/metadata/android/en-US/images/phoneScreenshots/1.png" height="400"/>
-<image src="fastlane/metadata/android/en-US/images/phoneScreenshots/2.png" height="400"/>
-<image src="fastlane/metadata/android/en-US/images/phoneScreenshots/3.png" height="400"/>
-<image src="fastlane/metadata/android/en-US/images/phoneScreenshots/4.png" height="400"/>
-<image src="fastlane/metadata/android/en-US/images/phoneScreenshots/5.png" height="400"/>
-</p>
+Without a `keystore.properties` file the release APK is built unsigned. The debug key is never used for release builds.
 
+## Known limitations
 
+- Only the English text for the new labels (Repeat, Advanced, Dismiss task, the header lines) exists. Other languages show these few labels in English until they are translated. All other text uses the existing translations.
+- The scroll-wheel picker replaces the add-alarm time dialog. The "Time picker" style setting still applies to the other time dialogs in the app.
+- Screens other than the alarm list and alarm editor (timer, stopwatch, clock, settings) keep their upstream layout apart from the new header and navigation bar.
+- `flutter analyze` reports two errors in `lib/settings/screens/list_filter_settings_screen.dart`. They come from upstream; the file is not used by the app and the build is not affected.
+- The Android build uses a newer D8/R8 than the one bundled with Android Gradle Plugin 7.4.2, because the bundled one fails on current AndroidX libraries. See [docs/CUSTOM_CHANGES.md](docs/CUSTOM_CHANGES.md).
+
+## Staying in sync with upstream
+
+This repository keeps the upstream history. `origin` is this fork and `upstream` is `vicolo-dev/chrono`. Steps for pulling in new upstream versions are in [docs/UPDATING_FROM_UPSTREAM.md](docs/UPDATING_FROM_UPSTREAM.md).
+
+## More documentation
+
+- [CHANGELOG.md](CHANGELOG.md)
+- [docs/BUILDING.md](docs/BUILDING.md)
+- [docs/CUSTOM_CHANGES.md](docs/CUSTOM_CHANGES.md)
+- [docs/UPDATING_FROM_UPSTREAM.md](docs/UPDATING_FROM_UPSTREAM.md)
+- [docs/ABOUT_CHRONO.md](docs/ABOUT_CHRONO.md)
+
+## License and credits
+
+Chrono Custom is licensed under the [GNU General Public License v3.0](LICENSE), the same license as upstream. The original app, its features and nearly all of its code are the work of the [Chrono developers and contributors](https://github.com/vicolo-dev/chrono/graphs/contributors). Translations come from the [Chrono Weblate project](https://hosted.weblate.org/projects/chrono/). The scroll-wheel time picker is adapted from [flutter_time_picker_spinner](https://github.com/icemanbsi/flutter_time_picker_spinner) (BSD license, notice kept in the source file), as it already was upstream.

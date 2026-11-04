@@ -21,6 +21,7 @@ import 'package:clock_app/theme/utils/color_scheme.dart';
 import 'package:clock_app/timer/screens/timer_notification_screen.dart';
 import 'package:clock_app/widgets/logic/update_widgets.dart';
 import 'package:dynamic_color/dynamic_color.dart';
+import 'package:clock_app/navigation/data/tabs.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
@@ -220,7 +221,8 @@ class _AppState extends State<App> {
                     <String, dynamic>{"tab": defaultTab}) as Map;
                 return MaterialPageRoute(
                     builder: (context) => NavScaffold(
-                          initialTabIndex: arguments["tab"],
+                          initialTabIndex:
+                              tabIndexFromLegacyIndex(context, arguments["tab"]),
                         ));
               }
 
