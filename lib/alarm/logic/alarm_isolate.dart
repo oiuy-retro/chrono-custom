@@ -27,7 +27,8 @@ const String setAlarmVolumePortName = "setAlarmVolumePort";
 @pragma('vm:entry-point')
 void triggerScheduledNotification(int scheduleId, Json params) async {
   FlutterError.onError = (FlutterErrorDetails details) {
-    logger.f("Error in triggerScheduledNotification isolate: ${details.exception.toString()}");
+    logger.f(
+        "Error in triggerScheduledNotification isolate: ${details.exception.toString()}");
   };
 
   logger.t(
@@ -179,7 +180,8 @@ void setVolume(double volume) {
 }
 
 void stopAlarm(int scheduleId, AlarmStopAction action) async {
-  logger.i("[stopAlarm] Stopping alarm $scheduleId with action: ${action.name}");
+  logger
+      .i("[stopAlarm] Stopping alarm $scheduleId with action: ${action.name}");
   if (action == AlarmStopAction.snooze) {
     await updateAlarmById(scheduleId, (alarm) async => await alarm.snooze());
     // await createSnoozeNotification(scheduleId);

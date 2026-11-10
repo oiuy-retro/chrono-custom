@@ -1,3 +1,6 @@
+import 'package:clock_app/alarm/logic/alarm_defaults_migration.dart';
+import 'package:clock_app/theme/logic/theme_migration.dart';
+import 'package:clock_app/alarm/logic/alarm_sort_default.dart';
 import 'dart:io';
 
 import 'package:awesome_notifications/awesome_notifications.dart';
@@ -64,6 +67,7 @@ Future<void> initializeStorage([bool clearSettingsOnDebug = true]) async {
   // }
   //
   await initList<Alarm>("alarms", []);
+  await initAlarmSortDefault();
   await initList<Tag>("tags", defaultTags);
   await initList<AlarmEvent>("alarm_events", []);
   await initList<ScheduleId>('schedule_ids', []);
@@ -90,4 +94,6 @@ Future<void> initializeSettings() async {
   }
 
   await appSettings.load();
+  await migrateThemeSettings();
+  await migrateAlarmDefaults();
 }

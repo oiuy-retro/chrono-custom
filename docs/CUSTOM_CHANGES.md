@@ -1,0 +1,116 @@
+# Custom changes
+
+This file lists every change compared with upstream Chrono, with the files involved.
+
+## Interface
+
+### Large collapsing header
+- New `lib/navigation/widgets/large_header.dart`: big title and subtitle that shrink to a toolbar.
+- `lib/navigation/screens/nav_scaffold.dart`: uses the header instead of the small top bar. It listens to vertical scrolling of the current tab to decide how far to collapse. The Alarm tab subtitle uses the next upcoming alarm and refreshes every 30 seconds and whenever the alarm list is saved. The settings button stays in the header.
+- `lib/alarm/utils/next_alarm.dart`: adds `alarmListRevision` (a counter the alarm list bumps on save) and `getNextUpcomingAlarm()`.
+
+### Tab order and labels
+- `lib/navigation/data/tabs.dart`: order is now Alarm, Clock, Stopwatch, Timer. The "Default Tab" setting still stores the upstream index (0 Alarm, 1 Clock, 2 Timer, 3 Stopwatch); `tabIndexFromLegacyIndex()` converts it, so saved settings and backups keep working.
+- `lib/app.dart`: uses that conversion when opening the app.
+- `nav_scaffold.dart` and `lib/navigation/widgets/app_navigation_bar.dart`: labels always shown in both navigation bar styles.
+
+### Alarm list item
+- `lib/alarm/widgets/alarm_card.dart`: new layout. Same actions as before (switch, Dismiss for snoozed alarms that cannot be disabled, delete for finished alarms, and the Skip, Duplicate and Delete menu).
+
+### Add and edit alarm screen
+- New `lib/alarm/screens/alarm_editor_screen.dart`. It edits a copy of the alarm, the same way upstream's customize screen did, and uses the same Cancel and Save buttons and the unsaved-changes prompt.
+- Sections and where each upstream setting went:
+  - Label: Label
+  - Repeat: everything in the upstream "Schedule" group (type, week days, dates, date range, interval, delete after ringing, delete after finishing)
+  - Sound: Melody, Volume, Rising volume, Time to full volume, Audio channel
+  - Vibration: Vibration
+  - Snooze: Enabled, Length, Max snoozes
+  - Dismiss task: Tasks
+  - Advanced (collapsed): Start melody at random position, Volume while doing tasks, While snoozed (prevent disabling, prevent deletion), Tags, and any setting not listed above
+- The alarm settings schema (`lib/alarm/data/alarm_settings_schema.dart`) is unchanged, so saved alarms and backups are compatible with upstream 0.6.0.
+- `lib/alarm/screens/alarm_screen.dart`: the add button and the "Add alarm" launcher shortcut open this screen directly with the current time.
+
+### Alarm reliability setup
+- New `android/app/src/main/kotlin/com/vicolo/chrono/ReliabilityChannel.kt`, registered in `MainActivity.kt`, on the method channel `com.vicolo.chrono/reliability`. `getStatus` returns the Android version, `Build.MANUFACTURER`, and: notifications enabled, `AlarmManager.canScheduleExactAlarms()` (Android 12+), `NotificationManager.canUseFullScreenIntent()` (Android 14+), `PowerManager.isIgnoringBatteryOptimizations()`, and `PackageManager.isAutoRevokeWhitelisted` (Android 11+). `open` starts the matching settings screen. Every intent is tried in a list with try/catch and falls back to App info and then the main Settings screen, so a missing screen never crashes the app.
+- Intents used: app notification settings; `ACTION_REQUEST_SCHEDULE_EXACT_ALARM`; `android.settings.MANAGE_APP_USE_FULL_SCREEN_INTENT`; `ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` then `ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS`; `Intent.ACTION_AUTO_REVOKE_PERMISSIONS`. For Samsung "Never sleeping apps": `com.samsung.android.lool` / `com.samsung.android.sm` / `com.samsung.android.sm_cn` battery activities, then `ACTION_POWER_USAGE_SUMMARY`. For Samsung "Unrestricted": App info.
+- The manifest already declared `USE_EXACT_ALARM` and `SCHEDULE_EXACT_ALARM` upstream, so on Android 13 and newer exact alarms are normally allowed already. The app does not use "display over other apps", so that permission is not requested.
+- New `lib/system/logic/reliability.dart`: status model, the ordered item list, Done ticks and the "shown once" flag (stored with GetStorage). Notification permission is requested with `permission_handler` first and falls back to the settings screen.
+- New `lib/system/screens/reliability_screen.dart`: the screen (refreshes on resume; "Fix all" works through a queue, one item per return to the app) and the Alarm tab banner.
+- `lib/navigation/screens/nav_scaffold.dart`: opens the screen once on first launch.
+- `lib/alarm/screens/alarm_screen.dart`: shows the banner above the alarm list.
+- `lib/settings/data/general_settings_schema.dart`: "Alarm reliability setup" entry at the top of Reliability. Defaults for "Show Foreground Notification" and "useBackgroundService" changed from off to on. Saved values are kept, so this only affects new installs. The alarm audio channel default was already "Alarm" upstream, and boot handling and full-screen alarms are always on (they have no setting).
+
+### Text
+- `lib/l10n/app_en.arb`: new English strings `alarmRingsInHeader`, `allAlarmsOffHeader`, `repeatSection`, `advancedSection`, `advancedSectionDescription`, `dismissTaskSection`, `dismissTaskSectionDescription`, and the `reliability*` strings for the setup screen. The file was rewritten by a script, which also normalised some spacing; no existing text changed.
+
+### Theme
+- `lib/theme/data/default_style_themes.dart`: the default "Paper" style has a corner radius of 24 instead of 16. Existing installs keep their saved style.
+
+## Samsung Clock design and vibration feedback (pre-release 3)
+
+This replaces the earlier mix of Samsung and Apple styles.
+
+- `lib/navigation/widgets/large_header.dart`: centred large title (38 sp) and subtitle.
+- `lib/navigation/screens/nav_scaffold.dart`: the expanded header is about 30% of the screen height (between 160 and 320 dp) and collapses to 56 dp. Vibration on tab and page change.
+- `lib/navigation/widgets/app_navigation_bar.dart`: rounded bottom bar with text tabs and a highlight on the current tab. Used when "Use Material Style" is off (the default); the Material bar is unchanged.
+- `lib/alarm/widgets/alarm_card.dart`: label, large time (AM/PM smaller), day letters with active days highlighted, or the date for other repeat types; switch with vibration.
+- New `lib/alarm/logic/day_chips.dart`: reads and writes the day buttons. It only uses the existing "Type" and "Week Days" settings: no days selected means Once, all seven means Daily, anything else is Weekly with those days. Saved alarms and backups stay compatible.
+- `lib/alarm/screens/alarm_editor_screen.dart`: rebuilt in the Samsung layout described in the README. The other repeat types, the full sound settings and the snooze settings open from the calendar button and the rows. Any setting not shown on the main screen is listed in the Advanced section, so none is lost.
+- `lib/common/widgets/customize_screen.dart`: new `buttonsAtBottom` option for a bottom Cancel/Save bar.
+- `lib/common/widgets/list/custom_list_view.dart`: select mode with round check boxes and a bottom bar (All, Delete, Cancel); `listSelectionActive` lets the add button hide (`lib/common/widgets/fab.dart`).
+- `lib/stopwatch/screens/stopwatch_screen.dart` and `lib/stopwatch/widgets/stopwatch_ticker.dart`: wide round buttons instead of floating buttons (Reset is available when paused, as in Samsung Clock) and large digits in the 00:00.00 format (`formatStopwatchTime`).
+- `lib/timer/widgets/timer_card.dart`: circular ring with the time inside, round play/pause and reset buttons, same menu.
+- `lib/clock/widgets/timezone_card_content.dart`: larger city name and time.
+- `lib/theme/data/default_color_schemes.dart` and `lib/theme/theme.dart`: "One UI" and "One UI Dark" schemes, used as defaults on new installs.
+- `lib/settings/data/general_settings_schema.dart`: Swipe Action defaults to switching tabs on new installs.
+- New `lib/common/utils/haptics.dart`: one place for all vibration feedback. It uses Flutter's `HapticFeedback`, which goes through Android's view feedback and so follows the system touch feedback setting, and checks the new "Vibration Feedback" switch in `lib/settings/data/accessibility_settings_schema.dart` (on by default).
+- Vibration added in: `spinner_time_picker.dart` (each wheel tick), `switch_field.dart`, `toggle_field.dart`, the day buttons, `custom_list_view.dart` (press and hold, select), `action_pane.dart` (swipe delete and duplicate), `fab.dart`, the stopwatch and timer buttons, and tab changes.
+- `lib/l10n/app_en.arb`: new English strings for the above.
+
+## Alarm order and dark mode (pre-release 4)
+
+- New `lib/alarm/logic/alarm_sort_default.dart`: `initAlarmSortDefault()`, called from `initializeStorage()` in `lib/settings/logic/initialize_settings.dart`. The sort choice lives in the `alarms-sort-index` file (0 = upstream "Default", the order alarms were added in; 5 = "Early hours first"). A new install, or an install still on 0, is set to 5 once; a marker file `alarms-sort-time-of-day-v1` stops it from running again, so later choices are respected.
+- `lib/common/widgets/list/custom_list_view.dart`: sorting is stable (ties keep the saved order). New `showSortControl` option, passed through `persistent_list_view.dart` and `list_filter_bar.dart`, hides the Sort chip without turning sorting off.
+- `lib/alarm/screens/alarm_screen.dart`: always passes the sort options; "Show Sort" only controls `showSortControl`.
+- `lib/settings/data/settings_schema.dart`: new root setting "Theme" (System default / Light / Dark, stored as an index, default 0). `lib/app.dart` uses it for `themeMode` in both the Material You and the colour scheme paths, and always uses "Dark Color Scheme" for dark mode.
+- `lib/theme/data/appearance_settings_schema.dart`: "Brightness" and "System Dark Mode" are hidden (`isVisual: false`) but kept so saved settings and backups load. "Dark Color Scheme" no longer depends on "System Dark Mode".
+- New `lib/theme/logic/theme_migration.dart`: `migrateThemeSettings()`, run once after settings load (GetStorage flag `chrono_custom_theme_migrated_v1`). It sets the dark scheme to One UI Dark unless "System Dark Mode" was on, carries an explicit Material You Light/Dark choice over to Theme, and adds the One UI schemes to the saved scheme list if missing.
+- `lib/theme/types/color_scheme.dart`: `getColorScheme()` sets `Brightness.dark` when the background is dark (it was always light), so Flutter's built-in widgets pick readable colours.
+- `lib/theme/utils/color_scheme.dart`: `getTheme()` sets the default icon colour from the scheme. New `withDistinctCards()` gives Material You schemes a page colour and a separate card colour (used in `app.dart`).
+- `lib/alarm/screens/alarm_editor_screen.dart`: the Alarm name field is underlined with no fill.
+- `lib/l10n/app_en.arb`: `themeSetting`, `themeSettingDescription`, `themeSystemDefault`, `themeLight`, `themeDark`.
+
+## Phone speaker copy and random start point (pre-release 5)
+
+- New local Flutter plugin `plugins/speaker_output` (added to `pubspec.yaml` as a path dependency). It is a plugin rather than code in `MainActivity` because alarms ring in a background Flutter engine started by the alarm manager, and only plugins are registered there automatically.
+  - Kotlin side (`SpeakerOutputPlugin.kt`, method channel `com.oiuyretro.chrono/speaker_output`): `status` reports whether a Bluetooth output (A2DP, SCO, hearing aid, LE audio headset, speaker or broadcast) is connected, using `AudioManager.getDevices` (Android 6+). `start` plays the sound with an Android `MediaPlayer` using alarm usage, looping, seeks to the given start point and only then starts and replies. On Android 9+ it calls `setPreferredDevice` with the built-in speaker. `setVolume`, `pause` and `stop` control it. An `AudioDeviceCallback` tells Dart when the last Bluetooth output goes away. The player is released when stopped or when the engine is detached.
+  - Dart side (`lib/speaker_output.dart`): wraps the channel; every call is a no-op that returns false if the native side is missing.
+- `lib/audio/types/ringtone_player.dart`: when the alarm has "Also ring on phone speaker" on and Bluetooth output is connected, the main just_audio player uses media usage (Android sends that to the Bluetooth device) and the speaker copy is started first at the same start point; the main player starts right after it reports playing. Volume changes (initial volume, rising volume steps, the lower volume while doing a dismiss task) go to both. `stop()` and `pause()` stop the speaker copy, and starting a timer or another alarm stops it first. When Bluetooth disconnects mid-alarm the main player is set to volume 0 and the speaker copy continues. Rising volume steps now carry a play counter so steps from an earlier sound cannot change a later one, and the initial volume no longer cancels them (an upstream bug).
+- New `lib/audio/logic/random_start.dart`: `randomStartPosition()` returns 0 for unknown lengths and sounds under 20 seconds, otherwise a random point up to the earlier of "15 seconds before the end" and "80% of the length". It replaces upstream's "any point from 0 to 99%". The length comes from just_audio when the sound is loaded, so it works for system ringtones (content URIs), the built-in default sound and files the user added; for a folder melody the randomly chosen file is used for both copies.
+- `lib/alarm/data/alarm_settings_schema.dart`: `start_melody_at_random_pos` defaults to on; new `also_ring_on_phone_speaker` (off) in the Sound group. Saved alarms without it load with it off. `lib/alarm/types/alarm.dart`: `alsoRingOnPhoneSpeaker` getter.
+- New `lib/alarm/logic/alarm_defaults_migration.dart`: `migrateAlarmDefaults()`, run once after settings load (GetStorage flag `chrono_custom_random_start_default_v1`), turns on random start in Settings, Alarm, Default Settings, which is the template for new alarms.
+- `lib/alarm/screens/alarm_editor_screen.dart`: two switch rows under Alarm sound.
+- `lib/l10n/app_en.arb`: `startMelodyAtRandomPos` is now "Start at random point" with a new description; new `alsoRingOnSpeaker` and `alsoRingOnSpeakerDescription`.
+
+How routing behaves on different Android versions:
+- Android 9 and newer: the speaker copy asks for the built-in speaker explicitly. Phone makers' audio policies can still override this; it has not been tested on a phone.
+- Android 6 to 8.1: there is no way to pick the speaker for a `MediaPlayer`, so the speaker copy only relies on alarm usage, which Android normally plays on the speaker (and on some phones also on the Bluetooth device).
+- Android 5: Bluetooth output cannot be detected, so only one copy plays.
+- If Bluetooth connects after the alarm started, nothing changes until the alarm rings again.
+- The app has no automatic ring timeout; the alarm rings until it is dismissed or snoozed, and both copies stop then.
+
+## Packaging and build
+- `android/app/build.gradle`: application ID `com.oiuyretro.chrono`; app name "Chrono Custom"; release signing from `CHRONO_KEYSTORE_PROPERTIES` or `android/keystore.properties`, unsigned if neither exists. The Kotlin package and method channel names are still `com.vicolo.chrono`; they are internal and do not affect installation.
+- `android/keystore.properties.example`: template for the signing file.
+- `android/settings.gradle`: adds `com.android.tools:r8:8.3.37` to the settings build script classpath. The D8 bundled with Android Gradle Plugin 7.4.2 fails with a NullPointerException on libraries compiled with JDK 21 (AndroidX lifecycle 2.8.x, tsbackgroundfetch 4.1.1).
+- `android/gradle.properties`: Gradle heap raised from 1.5 GB to 4 GB.
+- `pubspec.yaml`: version `0.6.0-custom.1+32`; `path_provider_platform_interface` and `plugin_platform_interface` added as dev dependencies for the screenshot test.
+- `.gitignore`: signing files and `test/screenshots/goldens/`.
+
+## Tests
+- New `test/screenshots/redesign_screenshots_test.dart` (also renders the reliability screen).
+- New `test/alarm/logic/day_chips_test.dart` (day button rules and the vibration setting) and `test/stopwatch/stopwatch_format_test.dart`.
+- The screenshot test also renders the stopwatch, timer and world clock, and dark versions of the main screens, settings and the ringing screen.
+- New `test/alarm/logic/alarm_sort_test.dart` and `test/theme/theme_dark_test.dart`.
+- New `test/audio/random_start_test.dart`: start point limits, new defaults, the one-time template change, and the speaker channel calls.
+- New `test/system/reliability_test.dart`: item list per Android version and maker, Samsung title, and the Fix all order.

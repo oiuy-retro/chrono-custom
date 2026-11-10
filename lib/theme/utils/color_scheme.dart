@@ -35,6 +35,27 @@ ColorSchemeData getColorSchemeData(ColorScheme colorScheme) {
 //
 // }
 //
+/// Chrono Custom: Material You schemes use the same colour for the page and
+/// for cards, so cards disappear. Samsung style needs cards that stand out:
+/// in light mode white-ish cards on a tinted page, in dark mode lighter grey
+/// cards on a near-black page.
+ColorScheme withDistinctCards(ColorScheme s) {
+  final bool dark = s.brightness == Brightness.dark;
+  Color page = dark ? s.surfaceContainerLowest : s.surfaceContainer;
+  Color card = dark ? s.surfaceContainerHigh : s.surfaceContainerLowest;
+  if (page == card) {
+    // Older dynamic palettes have no container colours: derive them.
+    page = dark
+        ? Color.alphaBlend(Colors.black.withOpacity(0.5), s.surface)
+        : Color.alphaBlend(s.primary.withOpacity(0.06), s.surface);
+    card = dark
+        ? Color.alphaBlend(s.primary.withOpacity(0.10), s.surface)
+        : Color.alphaBlend(Colors.white.withOpacity(0.7), s.surface);
+  }
+  // ignore: deprecated_member_use
+  return s.copyWith(background: page, surface: card);
+}
+
 ThemeData getTheme(
     {ColorScheme? colorScheme,
     ColorSchemeData? colorSchemeData,
@@ -69,6 +90,9 @@ SettingGroup appearanceSettings = appSettings
     colorScheme: colorScheme ?? getColorScheme(colorSchemeData),
     scaffoldBackgroundColor: colorSchemeData.background,
     cardColor: colorSchemeData.card,
+    // Icons without their own colour follow the scheme (light on dark).
+    iconTheme: defaultTheme.iconTheme
+        .copyWith(color: colorSchemeData.onBackground),
     radioTheme: getRadioTheme(colorSchemeData),
     dialogBackgroundColor: colorSchemeData.card,
     bottomSheetTheme: getBottomSheetTheme(colorSchemeData, styleTheme),

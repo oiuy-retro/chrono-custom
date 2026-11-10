@@ -2,7 +2,7 @@ name: clock_app
 description: An alarm, clock, timer and stowatch app.
 
 publish_to: "none" # Remove this line if you wish to publish to pub.dev
-version: 0.6.0+28
+version: 0.6.0-custom.1+32
 
 environment:
   sdk: '>=3.4.0 <4.0.0'
@@ -32,6 +32,9 @@ dependencies:
       path: packages/android_alarm_manager_plus
       ref: alarm_show_intent
   just_audio: ^0.9.31
+  # Chrono Custom: second copy of the alarm on the phone speaker.
+  speaker_output:
+    path: plugins/speaker_output
   awesome_notifications: ^0.9.3
   # awesome_notifications:
   #   path: "../awesome_notifications"
@@ -94,6 +97,8 @@ dependencies:
     #
 
 dev_dependencies:
+  path_provider_platform_interface: any
+  plugin_platform_interface: any
   flutter_test:
     sdk: flutter
   flutter_lints: ^3.0.1

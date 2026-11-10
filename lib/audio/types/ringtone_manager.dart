@@ -1,5 +1,5 @@
 class RingtoneManager {
-    static String _lastPlayedRingtoneUri = "";
+  static String _lastPlayedRingtoneUri = "";
 
   static final List<void Function()> _listeners = [];
 

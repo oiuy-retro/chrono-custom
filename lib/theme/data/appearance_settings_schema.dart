@@ -46,17 +46,17 @@ SettingGroup appearanceSettingsSchema = SettingGroup(
                       AppLocalizations.of(context)!.materialBrightnessDark,
                   ThemeBrightness.dark),
             ],
-            enableConditions: [
-              ValueCondition(["Use Material You"], (value) => value == true)
-            ],
+            // Replaced by the "Theme" setting at the top of Settings. Kept
+            // hidden so saved settings and backups still load.
+            isVisual: false,
             onChange: (context, index) => {App.refreshTheme(context)}),
         SwitchSetting(
             "System Dark Mode",
             (context) => AppLocalizations.of(context)!.systemDarkModeSetting,
             false,
-            enableConditions: [
-              ValueCondition(["Use Material You"], (value) => value == false)
-            ],
+            // Dark mode is now controlled by "Theme"; kept hidden for
+            // compatibility with saved settings and backups.
+            isVisual: false,
             onChange: (context, value) => {App.refreshTheme(context)}),
         CustomSetting(
           "Color Scheme",
@@ -109,7 +109,6 @@ SettingGroup appearanceSettingsSchema = SettingGroup(
           searchTags: ["theme", "style", "visual", "dark mode", "night mode"],
           enableConditions: [
             ValueCondition(["Use Material You"], (value) => value == false),
-            ValueCondition(["System Dark Mode"], (value) => value == true)
           ],
         ),
         SwitchSetting(

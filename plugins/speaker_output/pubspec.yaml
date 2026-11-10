@@ -1,0 +1,19 @@
+name: speaker_output
+description: Chrono Custom helper that plays a second copy of an alarm sound on the phone's built-in speaker while Bluetooth audio is connected.
+version: 0.1.0
+publish_to: none
+
+environment:
+  sdk: '>=3.4.0 <4.0.0'
+  flutter: ">=3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+flutter:
+  plugin:
+    platforms:
+      android:
+        package: com.oiuyretro.chrono.speaker_output
+        pluginClass: SpeakerOutputPlugin

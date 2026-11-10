@@ -1,3 +1,4 @@
+import 'package:clock_app/common/utils/haptics.dart';
 import 'package:flutter/material.dart';
 
 class ToggleOption<T> {
@@ -66,7 +67,10 @@ class _ToggleFieldState<T> extends State<ToggleField<T>> {
               minWidth: (parentWidth - (40 + 16 * 2)) / widget.options.length,
             ),
             isSelected: widget.selectedItems,
-            onPressed: widget.onChange,
+            onPressed: (index) {
+              Haptics.toggle();
+              widget.onChange(index);
+            },
             children: [
               for (final option in widget.options)
                 Padding(

@@ -3,6 +3,8 @@ import 'package:clock_app/icons/flux_icons.dart';
 import 'package:clock_app/settings/data/settings_schema.dart';
 import 'package:clock_app/settings/types/setting.dart';
 import 'package:clock_app/theme/types/theme_extension.dart';
+import 'package:clock_app/common/utils/haptics.dart';
+import 'package:clock_app/common/widgets/list/custom_list_view.dart';
 import 'package:flutter/material.dart';
 
 enum FabPosition { bottomLeft, bottomRight }
@@ -76,16 +78,27 @@ class _FABState extends State<FAB> {
       left: position == FabPosition.bottomLeft
           ? 16 + (widget.index * 24 * widget.size) + widget.index * 36
           : null,
-      child: CardContainer(
-        elevationMultiplier: 2,
-        color: colorScheme.primary,
-        onTap: widget.onPressed,
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Icon(
-            widget.icon,
-            color: colorScheme.onPrimary,
-            size: 24 * widget.size,
+      // Hidden while a list is in select mode (the action bar is there).
+      child: ValueListenableBuilder<bool>(
+        valueListenable: listSelectionActive,
+        builder: (context, selecting, child) =>
+            selecting ? const SizedBox.shrink() : child!,
+        child: CardContainer(
+          elevationMultiplier: 2,
+          color: colorScheme.primary,
+          onTap: widget.onPressed == null
+              ? null
+              : () {
+                  Haptics.button();
+                  widget.onPressed!();
+                },
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Icon(
+              widget.icon,
+              color: colorScheme.onPrimary,
+              size: 24 * widget.size,
+            ),
           ),
         ),
       ),

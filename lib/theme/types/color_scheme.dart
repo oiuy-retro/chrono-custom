@@ -120,7 +120,11 @@ ColorScheme getColorScheme(ColorSchemeData colorSchemeData) {
     background: colorSchemeData.background,
     error: colorSchemeData.error,
     secondary: colorSchemeData.accent,
-    brightness: Brightness.light,
+    // Chrono Custom: let Flutter know when a scheme is dark, so built-in
+    // widgets (check boxes, text fields, dialogs) use light-on-dark colours.
+    brightness: colorSchemeData.background.computeLuminance() < 0.3
+        ? Brightness.dark
+        : Brightness.light,
     onError: colorSchemeData.onError,
     onPrimary: colorSchemeData.onAccent,
     surface: colorSchemeData.card,

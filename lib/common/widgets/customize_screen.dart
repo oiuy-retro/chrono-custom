@@ -1,5 +1,6 @@
 import 'package:clock_app/common/types/list_item.dart';
 import 'package:clock_app/navigation/widgets/app_top_bar.dart';
+import 'package:clock_app/common/utils/haptics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
@@ -16,7 +17,11 @@ class CustomizeScreen<Item extends CustomizableListItem>
     this.onSave,
     required this.builder,
     required this.isNewItem,
+    this.buttonsAtBottom = false,
   });
+
+  /// Samsung style: Cancel and Save in a bar at the bottom, no top bar.
+  final bool buttonsAtBottom;
 
   final Item item;
   final void Function(Item item)? onSave;
@@ -41,8 +46,57 @@ class _CustomizeScreenState<Item extends CustomizableListItem>
   Widget build(BuildContext context) {
     ThemeData theme = Theme.of(context);
     ColorScheme colorScheme = theme.colorScheme;
+    void save() {
+      Haptics.button();
+      widget.onSave?.call(_item);
+      _isSaved = true;
+      Navigator.pop(context, _item);
+    }
+
+    final Widget? bottomBar = widget.buttonsAtBottom
+        ? SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextButton(
+                      onPressed: () {
+                        Haptics.button();
+                        Navigator.pop(context);
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        child: Text(AppLocalizations.of(context)!.cancelButton,
+                            style: TextStyle(
+                                fontSize: 17,
+                                color: colorScheme.onSurface.withOpacity(0.8))),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: TextButton(
+                      onPressed: save,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        child: Text(AppLocalizations.of(context)!.saveButton,
+                            style: const TextStyle(
+                                fontSize: 17, fontWeight: FontWeight.w600)),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          )
+        : null;
+
     return Scaffold(
-      appBar: AppTopBar(actions: [
+      bottomNavigationBar: bottomBar,
+      appBar: widget.buttonsAtBottom
+          ? const AppTopBar()
+          : AppTopBar(actions: [
         TextButton(
           onPressed: () {
             Navigator.pop(context);
@@ -57,11 +111,7 @@ class _CustomizeScreenState<Item extends CustomizableListItem>
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8.0),
           child: TextButton(
-            onPressed: () {
-              widget.onSave?.call(_item);
-              _isSaved = true;
-              Navigator.pop(context, _item);
-            },
+            onPressed: save,
             child: Text(AppLocalizations.of(context)!.saveButton),
           ),
         )

@@ -183,9 +183,20 @@ SettingGroup alarmSettingsSchema = SettingGroup(
             SwitchSetting(
               "start_melody_at_random_pos",
               (context) => AppLocalizations.of(context)!.startMelodyAtRandomPos,
-              false,
+              // Chrono Custom: on by default for new alarms.
+              true,
               getDescription: (context) => AppLocalizations.of(context)!
                   .startMelodyAtRandomPosDescription,
+            ),
+            // Chrono Custom: while Bluetooth audio is connected, also play
+            // the alarm on the phone's built-in speaker.
+            SwitchSetting(
+              "also_ring_on_phone_speaker",
+              (context) => AppLocalizations.of(context)!.alsoRingOnSpeaker,
+              false,
+              getDescription: (context) =>
+                  AppLocalizations.of(context)!.alsoRingOnSpeakerDescription,
+              searchTags: ["bluetooth", "speaker", "headphones", "earbuds"],
             ),
             SliderSetting(
                 "Volume",

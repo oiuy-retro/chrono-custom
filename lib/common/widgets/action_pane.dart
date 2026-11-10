@@ -1,3 +1,4 @@
+import 'package:clock_app/common/utils/haptics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -12,7 +13,10 @@ ActionPane getDeleteActionPane(VoidCallback onDelete, BuildContext context) {
     // extentRatio: Platform == 0.25,
     children: [
       CustomSlidableAction(
-        onPressed: (context) => onDelete(),
+        onPressed: (context) {
+          Haptics.heavy();
+          onDelete();
+        },
         backgroundColor: colorScheme.error,
         foregroundColor: colorScheme.onPrimary,
         child: Column(
@@ -43,7 +47,10 @@ ActionPane getDuplicateActionPane(
     // extentRatio: Platform == 0.25,
     children: [
       CustomSlidableAction(
-        onPressed: (context) => onDuplicate(),
+        onPressed: (context) {
+          Haptics.button();
+          onDuplicate();
+        },
         backgroundColor: colorScheme.primary,
         foregroundColor: colorScheme.onPrimary,
         child: Column(
