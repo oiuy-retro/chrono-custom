@@ -2,10 +2,10 @@ import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/material.dart';
 
-/// A large title header in the style of One UI and iOS.
+/// A large expanded app bar in the style of Samsung One UI.
 ///
-/// When [collapse] is 0 the header is tall, with a big title and an optional
-/// subtitle. As the page underneath scrolls, [collapse] goes towards 1 and the
+/// When [collapse] is 0 the header fills about the top third of the screen,
+/// with a big centred title and an optional centred subtitle. As the page underneath scrolls, [collapse] goes towards 1 and the
 /// header shrinks to a normal toolbar with a small title.
 class LargeHeader extends StatelessWidget {
   const LargeHeader({
@@ -68,27 +68,29 @@ class LargeHeader extends StatelessWidget {
             height: collapsedHeight,
             child: Row(children: actions),
           ),
-          // Large title block, fades out as it collapses.
+          // Large centred title block, fades out as it collapses.
           if (bigOpacity > 0)
             Positioned(
               left: 24,
               right: 24,
-              bottom: 12,
+              top: collapsedHeight * 0.5,
+              bottom: 8,
               child: Opacity(
                 opacity: bigOpacity,
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
                       title,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.center,
                       style: textTheme.displaySmall?.copyWith(
-                        fontSize: 34,
-                        fontWeight: FontWeight.w700,
+                        fontSize: 38,
+                        fontWeight: FontWeight.w400,
                         color: colorScheme.onSurface,
-                        letterSpacing: -0.5,
                       ),
                     ),
                     if (subtitle != null && subtitle!.isNotEmpty) ...[
@@ -97,8 +99,10 @@ class LargeHeader extends StatelessWidget {
                         subtitle!,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
                         style: textTheme.titleMedium?.copyWith(
-                          color: colorScheme.onSurface.withOpacity(0.65),
+                          fontWeight: FontWeight.w400,
+                          color: colorScheme.onSurface.withOpacity(0.6),
                         ),
                       ),
                     ],

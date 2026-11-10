@@ -1,3 +1,4 @@
+import 'package:clock_app/common/utils/haptics.dart';
 import 'package:flutter/material.dart';
 
 class SwitchField extends StatefulWidget {
@@ -26,7 +27,10 @@ class _SwitchFieldState extends State<SwitchField> {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: () => widget.onChanged?.call(!widget.value),
+        onTap: () {
+          Haptics.toggle();
+          widget.onChanged?.call(!widget.value);
+        },
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
           child: Row(
@@ -53,7 +57,12 @@ class _SwitchFieldState extends State<SwitchField> {
               const Spacer(),
               Switch(
                 value: widget.value,
-                onChanged: widget.onChanged,
+                onChanged: widget.onChanged == null
+                    ? null
+                    : (value) {
+                        Haptics.toggle();
+                        widget.onChanged!(value);
+                      },
               )
             ],
           ),

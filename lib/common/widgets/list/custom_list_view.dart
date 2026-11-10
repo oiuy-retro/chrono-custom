@@ -10,8 +10,14 @@ import 'package:clock_app/common/widgets/list/list_item_card.dart';
 import 'package:clock_app/settings/data/general_settings_schema.dart';
 import 'package:clock_app/settings/data/settings_schema.dart';
 import 'package:clock_app/settings/types/setting.dart';
+import 'package:clock_app/common/utils/haptics.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+
+/// True while any list is in select mode, so floating buttons can hide
+/// behind the selection action bar.
+final ValueNotifier<bool> listSelectionActive = ValueNotifier<bool>(false);
 
 class CustomListView<Item extends ListItem> extends StatefulWidget {
   const CustomListView({
@@ -101,6 +107,7 @@ class _CustomListViewState<Item extends ListItem>
 
   @override
   void dispose() {
+    if (_isSelecting) listSelectionActive.value = false;
     _longPressActionSetting.removeListener(_handleUpdateSettings);
     super.dispose();
   }
@@ -221,6 +228,7 @@ class _CustomListViewState<Item extends ListItem>
   }
 
   void _endSelection() {
+    listSelectionActive.value = false;
     setState(() {
       _isSelecting = false;
       // _isReordering = false;
@@ -229,6 +237,8 @@ class _CustomListViewState<Item extends ListItem>
   }
 
   void _startSelection(Item item) {
+    Haptics.heavy();
+    listSelectionActive.value = true;
     setState(() {
       _isSelecting = true;
       _selectedIds = [item.id];
@@ -236,6 +246,7 @@ class _CustomListViewState<Item extends ListItem>
   }
 
   void _handleSelect(Item item) {
+    Haptics.toggle();
     setState(() {
       if (_selectedIds.contains(item.id)) {
         _selectedIds.remove(item.id);
@@ -261,6 +272,7 @@ class _CustomListViewState<Item extends ListItem>
   }
 
   void _handleSelectAll() {
+    Haptics.toggle();
     setState(() {
       _selectedIds = widget.items.map((e) => e.id).toList();
     });
@@ -272,8 +284,8 @@ class _CustomListViewState<Item extends ListItem>
     _endSelection();
   }
 
-  void _handleDeleteAction() async {
-    Navigator.pop(context);
+  void _handleDeleteAction({bool fromMenu = true}) async {
+    if (fromMenu) Navigator.pop(context);
     final result = await showDeleteAlertDialogue(context);
     if (result == null || result == false) return;
 
@@ -330,6 +342,20 @@ class _CustomListViewState<Item extends ListItem>
         index: index,
         child: widget.itemBuilder(item),
       );
+      if (_isSelecting) {
+        // Samsung-style select mode: a checkbox in front of each card.
+        itemWidget = Row(
+          key: ValueKey(item.id),
+          children: [
+            Checkbox(
+              value: _selectedIds.contains(item.id),
+              shape: const CircleBorder(),
+              onChanged: (_) => _handleSelect(item),
+            ),
+            Expanded(child: itemWidget),
+          ],
+        );
+      }
       return itemWidget;
     };
   }
@@ -402,7 +428,62 @@ class _CustomListViewState<Item extends ListItem>
             )
           ]),
         ),
+        if (_isSelecting) _buildSelectionBar(context),
       ],
+    );
+  }
+
+  /// Bottom action bar shown in select mode, as in Samsung Clock.
+  Widget _buildSelectionBar(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final l = AppLocalizations.of(context)!;
+    final bool allSelected = _selectedIds.length == widget.items.length;
+    Widget action(IconData icon, String label, VoidCallback? onTap,
+        {Color? color}) {
+      return Expanded(
+        child: InkWell(
+          borderRadius: BorderRadius.circular(20),
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(icon, color: color ?? colorScheme.onSurface),
+                const SizedBox(height: 2),
+                Text(label,
+                    style: theme.textTheme.labelMedium
+                        ?.copyWith(color: color ?? colorScheme.onSurface)),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 0, 12, 4),
+      child: Material(
+        color: theme.cardColor,
+        borderRadius: BorderRadius.circular(24),
+        child: Row(
+          children: [
+            action(
+                allSelected
+                    ? Icons.check_circle_rounded
+                    : Icons.radio_button_unchecked_rounded,
+                l.selectAllAction,
+                allSelected ? _endSelection : _handleSelectAll),
+            if (widget.isDeleteEnabled)
+              action(Icons.delete_outline_rounded, l.deleteButton, () {
+                Haptics.heavy();
+                _handleDeleteAction(fromMenu: false);
+              }, color: colorScheme.error),
+            action(Icons.close_rounded, l.cancelButton, _endSelection),
+          ],
+        ),
+      ),
     );
   }
 }

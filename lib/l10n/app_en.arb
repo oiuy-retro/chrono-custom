@@ -845,5 +845,52 @@
   "reliabilityItemSamsungSleeping": "Never sleeping apps",
   "@reliabilityItemSamsungSleeping": {},
   "reliabilityItemSamsungSleepingDescription": "In Battery, open Background usage limits, add Chrono Custom to Never sleeping apps and turn off Put unused apps to sleep.",
-  "@reliabilityItemSamsungSleepingDescription": {}
+  "@reliabilityItemSamsungSleepingDescription": {},
+  "vibrationFeedbackSetting": "Vibration feedback",
+  "@vibrationFeedbackSetting": {},
+  "vibrationFeedbackSettingDescription": "Vibrate lightly when you scroll the time picker, flip switches and press buttons. Also follows the phone's touch feedback setting.",
+  "@vibrationFeedbackSettingDescription": {},
+  "selectAllAction": "All",
+  "@selectAllAction": {},
+  "selectedCount": "{count} selected",
+  "@selectedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "stopwatchStart": "Start",
+  "@stopwatchStart": {},
+  "stopwatchStop": "Stop",
+  "@stopwatchStop": {},
+  "stopwatchResume": "Resume",
+  "@stopwatchResume": {},
+  "stopwatchLap": "Lap",
+  "@stopwatchLap": {},
+  "stopwatchReset": "Reset",
+  "@stopwatchReset": {},
+  "alarmSoundRow": "Alarm sound",
+  "@alarmSoundRow": {},
+  "snoozeRowSummary": "{length} minutes, {count} times",
+  "@snoozeRowSummary": {
+    "placeholders": {
+      "length": {
+        "type": "String"
+      },
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "offLabel": "Off",
+  "@offLabel": {},
+  "onLabel": "On",
+  "@onLabel": {},
+  "repeatOptionsRow": "Repeat options",
+  "@repeatOptionsRow": {},
+  "alarmNameHint": "Alarm name",
+  "@alarmNameHint": {},
+  "everyDay": "Every day",
+  "@everyDay": {}
 }

@@ -1,11 +1,10 @@
-import 'package:clock_app/common/widgets/card_container.dart';
 import 'package:clock_app/navigation/data/tabs.dart';
 import 'package:clock_app/navigation/types/tab.dart';
-import 'package:clock_app/navigation/widgets/nav_bar.dart';
-import 'package:clock_app/navigation/widgets/nav_bar_item.dart';
 import 'package:flutter/material.dart' hide Tab;
 
-class AppNavigationBar extends StatefulWidget {
+/// Bottom tab bar in the style of Samsung Clock on One UI: a rounded bar with
+/// text tabs, the selected one in bold on a soft pill.
+class AppNavigationBar extends StatelessWidget {
   final int selectedTabIndex;
   final void Function(int) onTabSelected;
 
@@ -13,42 +12,70 @@ class AppNavigationBar extends StatefulWidget {
       {super.key, required this.selectedTabIndex, required this.onTabSelected});
 
   @override
-  State<AppNavigationBar> createState() => _AppNavigationBarState();
-}
-
-class _AppNavigationBarState extends State<AppNavigationBar> {
-
-
-  @override
   Widget build(BuildContext context) {
-        List<Tab> tabs = getTabs(context);
+    final List<Tab> tabs = getTabs(context);
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final textTheme = theme.textTheme;
 
-    return Padding(
-      padding:
-          const EdgeInsets.only(left: 16.0, right: 16.0, bottom: 4.0, top: 0),
-      child: CardContainer(
-        elevationMultiplier: 2,
-        // color: Colors.red,
-        child: BottomNavBar(
-          backgroundColor: Colors.transparent,
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+        child: Material(
+          color: theme.cardColor,
           elevation: 0,
-          items: [
-            for (final tab in tabs)
-              BottomNavBarItem(
-                icon: Icon(tab.icon),
-                label: tab.title,
-              )
-          ],
-          currentIndex: widget.selectedTabIndex,
-          selectedItemColor: Theme.of(context).colorScheme.primary,
-          unselectedItemColor:
-              Theme.of(context).colorScheme.onBackground.withOpacity(0.6),
-          showUnselectedLabels: true,
-          selectedLabelStyle: Theme.of(context).textTheme.titleSmall,
-          unselectedLabelStyle: Theme.of(context).textTheme.titleSmall,
-          iconSize: 24,
-          type: BottomNavBarType.fixed,
-          onTap: widget.onTabSelected,
+          borderRadius: BorderRadius.circular(28),
+          clipBehavior: Clip.antiAlias,
+          child: SizedBox(
+            height: 60,
+            child: Row(
+              children: [
+                for (int i = 0; i < tabs.length; i++)
+                  Expanded(
+                    child: Semantics(
+                      selected: i == selectedTabIndex,
+                      button: true,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(24),
+                        onTap: () => onTabSelected(i),
+                        child: Center(
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: i == selectedTabIndex
+                                  ? colorScheme.primary.withOpacity(0.12)
+                                  : Colors.transparent,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                tabs[i].title,
+                                maxLines: 1,
+                                overflow: TextOverflow.fade,
+                                softWrap: false,
+                                style: textTheme.titleSmall?.copyWith(
+                                  fontSize: 15,
+                                  fontWeight: i == selectedTabIndex
+                                      ? FontWeight.w700
+                                      : FontWeight.w500,
+                                  color: i == selectedTabIndex
+                                      ? colorScheme.onSurface
+                                      : colorScheme.onSurface.withOpacity(0.55),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
         ),
       ),
     );

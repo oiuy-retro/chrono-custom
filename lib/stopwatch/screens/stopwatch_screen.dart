@@ -2,9 +2,7 @@ import 'dart:async';
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:clock_app/common/types/list_controller.dart';
 import 'package:clock_app/common/utils/list_storage.dart';
-import 'package:clock_app/common/widgets/card_container.dart';
 import 'package:clock_app/common/widgets/list/custom_list_view.dart';
-import 'package:clock_app/common/widgets/fab.dart';
 import 'package:clock_app/notifications/data/notification_channel.dart';
 import 'package:clock_app/notifications/data/update_notification_intervals.dart';
 import 'package:clock_app/settings/data/settings_schema.dart';
@@ -15,6 +13,7 @@ import 'package:clock_app/stopwatch/types/lap.dart';
 import 'package:clock_app/stopwatch/types/stopwatch.dart';
 import 'package:clock_app/stopwatch/widgets/lap_card.dart';
 import 'package:clock_app/stopwatch/widgets/stopwatch_ticker.dart';
+import 'package:clock_app/common/utils/haptics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
@@ -149,8 +148,9 @@ class _StopwatchScreenState extends State<StopwatchScreen> {
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            const SizedBox(height: 16),
             StopwatchTicker(stopwatch: _stopwatch),
-            const SizedBox(height: 8),
+            const SizedBox(height: 16),
             Expanded(
               child: CustomListView<Lap>(
                 items: _stopwatch.laps,
@@ -168,31 +168,93 @@ class _StopwatchScreenState extends State<StopwatchScreen> {
                 onAddItem: (lap) => _stopwatch.updateFastestAndSlowestLap(),
               ),
             ),
+            const SizedBox(height: 72),
           ],
         ),
-        FAB(
-          onPressed: _handleToggleState,
-          icon: _stopwatch.isRunning
-              ? Icons.pause_rounded
-              : Icons.play_arrow_rounded,
-          size: 2,
+        // Samsung Clock style: two large rounded buttons at the bottom.
+        // Running: Lap / Stop. Paused: Reset / Resume. Stopped: Start.
+        Positioned(
+          left: 16,
+          right: 16,
+          bottom: 8,
+          child: Row(
+            children: [
+              if (_stopwatch.isStarted) ...[
+                Expanded(
+                  child: _PillButton(
+                    label: _stopwatch.isRunning
+                        ? AppLocalizations.of(context)!.stopwatchLap
+                        : AppLocalizations.of(context)!.stopwatchReset,
+                    onPressed: () {
+                      Haptics.button();
+                      _stopwatch.isRunning ? _handleAddLap() : _handleReset();
+                      setState(() {});
+                    },
+                    filled: false,
+                  ),
+                ),
+                const SizedBox(width: 12),
+              ],
+              Expanded(
+                child: _PillButton(
+                  label: _stopwatch.isRunning
+                      ? AppLocalizations.of(context)!.stopwatchStop
+                      : _stopwatch.isStarted
+                          ? AppLocalizations.of(context)!.stopwatchResume
+                          : AppLocalizations.of(context)!.stopwatchStart,
+                  onPressed: () {
+                    Haptics.button();
+                    _handleToggleState();
+                  },
+                  filled: true,
+                  danger: _stopwatch.isRunning,
+                ),
+              ),
+            ],
+          ),
         ),
-        if (_stopwatch.isStarted)
-          FAB(
-            index: 1,
-            onPressed: _handleAddLap,
-            icon: Icons.flag_rounded,
-            size: 2,
-          ),
-        if (_stopwatch.isStarted)
-          FAB(
-            index: 0,
-            position: FabPosition.bottomLeft,
-            onPressed: _handleReset,
-            icon: Icons.refresh_rounded,
-            size: 1,
-          ),
       ],
+    );
+  }
+}
+
+class _PillButton extends StatelessWidget {
+  const _PillButton({
+    required this.label,
+    required this.onPressed,
+    required this.filled,
+    this.danger = false,
+  });
+
+  final String label;
+  final VoidCallback onPressed;
+  final bool filled;
+  final bool danger;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final Color background = filled
+        ? (danger ? colorScheme.error : colorScheme.primary)
+        : colorScheme.onSurface.withOpacity(0.08);
+    final Color foreground = filled
+        ? (danger ? colorScheme.onError : colorScheme.onPrimary)
+        : colorScheme.onSurface;
+    return SizedBox(
+      height: 56,
+      child: FilledButton(
+        style: FilledButton.styleFrom(
+          backgroundColor: background,
+          foregroundColor: foreground,
+          shape: const StadiumBorder(),
+          textStyle: Theme.of(context)
+              .textTheme
+              .titleMedium
+              ?.copyWith(fontSize: 17, fontWeight: FontWeight.w600),
+        ),
+        onPressed: onPressed,
+        child: Text(label),
+      ),
     );
   }
 }

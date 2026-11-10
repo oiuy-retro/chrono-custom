@@ -8,7 +8,15 @@ SettingGroup accessibilitySettingsSchema = SettingGroup(
   (context) => AppLocalizations.of(context)!.accessibilitySettingGroup,
   [
     SwitchSetting("Left Handed Mode",
-        (context) => AppLocalizations.of(context)!.leftHandedSetting, false)
+        (context) => AppLocalizations.of(context)!.leftHandedSetting, false),
+    SwitchSetting(
+      "Vibration Feedback",
+      (context) => AppLocalizations.of(context)!.vibrationFeedbackSetting,
+      true,
+      getDescription: (context) =>
+          AppLocalizations.of(context)!.vibrationFeedbackSettingDescription,
+      searchTags: ["haptic", "vibration", "touch", "feedback"],
+    ),
   ],
   icon: Icons.accessibility_new_rounded,
   showExpandedView: false,

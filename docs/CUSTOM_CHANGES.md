@@ -46,14 +46,37 @@ This file lists every change compared with upstream Chrono, with the files invol
 ### Theme
 - `lib/theme/data/default_style_themes.dart`: the default "Paper" style has a corner radius of 24 instead of 16. Existing installs keep their saved style.
 
+## Samsung Clock design and vibration feedback (pre-release 3)
+
+This replaces the earlier mix of Samsung and Apple styles.
+
+- `lib/navigation/widgets/large_header.dart`: centred large title (38 sp) and subtitle.
+- `lib/navigation/screens/nav_scaffold.dart`: the expanded header is about 30% of the screen height (between 160 and 320 dp) and collapses to 56 dp. Vibration on tab and page change.
+- `lib/navigation/widgets/app_navigation_bar.dart`: rounded bottom bar with text tabs and a highlight on the current tab. Used when "Use Material Style" is off (the default); the Material bar is unchanged.
+- `lib/alarm/widgets/alarm_card.dart`: label, large time (AM/PM smaller), day letters with active days highlighted, or the date for other repeat types; switch with vibration.
+- New `lib/alarm/logic/day_chips.dart`: reads and writes the day buttons. It only uses the existing "Type" and "Week Days" settings: no days selected means Once, all seven means Daily, anything else is Weekly with those days. Saved alarms and backups stay compatible.
+- `lib/alarm/screens/alarm_editor_screen.dart`: rebuilt in the Samsung layout described in the README. The other repeat types, the full sound settings and the snooze settings open from the calendar button and the rows. Any setting not shown on the main screen is listed in the Advanced section, so none is lost.
+- `lib/common/widgets/customize_screen.dart`: new `buttonsAtBottom` option for a bottom Cancel/Save bar.
+- `lib/common/widgets/list/custom_list_view.dart`: select mode with round check boxes and a bottom bar (All, Delete, Cancel); `listSelectionActive` lets the add button hide (`lib/common/widgets/fab.dart`).
+- `lib/stopwatch/screens/stopwatch_screen.dart` and `lib/stopwatch/widgets/stopwatch_ticker.dart`: wide round buttons instead of floating buttons (Reset is available when paused, as in Samsung Clock) and large digits in the 00:00.00 format (`formatStopwatchTime`).
+- `lib/timer/widgets/timer_card.dart`: circular ring with the time inside, round play/pause and reset buttons, same menu.
+- `lib/clock/widgets/timezone_card_content.dart`: larger city name and time.
+- `lib/theme/data/default_color_schemes.dart` and `lib/theme/theme.dart`: "One UI" and "One UI Dark" schemes, used as defaults on new installs.
+- `lib/settings/data/general_settings_schema.dart`: Swipe Action defaults to switching tabs on new installs.
+- New `lib/common/utils/haptics.dart`: one place for all vibration feedback. It uses Flutter's `HapticFeedback`, which goes through Android's view feedback and so follows the system touch feedback setting, and checks the new "Vibration Feedback" switch in `lib/settings/data/accessibility_settings_schema.dart` (on by default).
+- Vibration added in: `spinner_time_picker.dart` (each wheel tick), `switch_field.dart`, `toggle_field.dart`, the day buttons, `custom_list_view.dart` (press and hold, select), `action_pane.dart` (swipe delete and duplicate), `fab.dart`, the stopwatch and timer buttons, and tab changes.
+- `lib/l10n/app_en.arb`: new English strings for the above.
+
 ## Packaging and build
 - `android/app/build.gradle`: application ID `com.oiuyretro.chrono`; app name "Chrono Custom"; release signing from `CHRONO_KEYSTORE_PROPERTIES` or `android/keystore.properties`, unsigned if neither exists. The Kotlin package and method channel names are still `com.vicolo.chrono`; they are internal and do not affect installation.
 - `android/keystore.properties.example`: template for the signing file.
 - `android/settings.gradle`: adds `com.android.tools:r8:8.3.37` to the settings build script classpath. The D8 bundled with Android Gradle Plugin 7.4.2 fails with a NullPointerException on libraries compiled with JDK 21 (AndroidX lifecycle 2.8.x, tsbackgroundfetch 4.1.1).
 - `android/gradle.properties`: Gradle heap raised from 1.5 GB to 4 GB.
-- `pubspec.yaml`: version `0.6.0-custom.1+29`; `path_provider_platform_interface` and `plugin_platform_interface` added as dev dependencies for the screenshot test.
+- `pubspec.yaml`: version `0.6.0-custom.1+30`; `path_provider_platform_interface` and `plugin_platform_interface` added as dev dependencies for the screenshot test.
 - `.gitignore`: signing files and `test/screenshots/goldens/`.
 
 ## Tests
 - New `test/screenshots/redesign_screenshots_test.dart` (also renders the reliability screen).
+- New `test/alarm/logic/day_chips_test.dart` (day button rules and the vibration setting) and `test/stopwatch/stopwatch_format_test.dart`.
+- The screenshot test also renders the stopwatch, timer and world clock.
 - New `test/system/reliability_test.dart`: item list per Android version and maker, Samsung title, and the Fix all order.

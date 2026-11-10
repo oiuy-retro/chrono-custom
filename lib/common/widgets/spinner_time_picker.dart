@@ -10,6 +10,7 @@ Redistribution and use in source and binary forms, with or without modification,
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+import 'package:clock_app/common/utils/haptics.dart';
 import 'package:flutter/material.dart';
 import 'dart:math';
 
@@ -430,9 +431,12 @@ class _TimePickerSpinnerState extends State<TimePickerSpinner> {
             });
           }
         } else if (scrollNotification is ScrollUpdateNotification) {
+          final int newIndex =
+              (controller.offset / _getItemHeight()!).round() + 1;
+          // Light tick on every step, like Samsung's time picker.
+          if (newIndex != selectedIndex) Haptics.tick();
           setState(() {
-            onUpdateSelectedIndex(
-                (controller.offset / _getItemHeight()!).round() + 1);
+            onUpdateSelectedIndex(newIndex);
           });
         }
         return true;
@@ -497,9 +501,11 @@ class _TimePickerSpinnerState extends State<TimePickerSpinner> {
             }
           }
         } else if (scrollNotification is ScrollUpdateNotification) {
+          final int newIndex =
+              (apController.offset / _getItemHeight()!).round() + 1;
+          if (newIndex != currentSelectedAPIndex) Haptics.tick();
           setState(() {
-            currentSelectedAPIndex =
-                (apController.offset / _getItemHeight()!).round() + 1;
+            currentSelectedAPIndex = newIndex;
             isAPScrolling = true;
           });
         }

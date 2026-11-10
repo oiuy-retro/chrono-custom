@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:clock_app/settings/data/settings_schema.dart';
 import 'package:clock_app/settings/types/setting.dart';
 import 'package:clock_app/settings/types/setting_group.dart';
@@ -88,13 +89,22 @@ class _StopwatchTickerState extends State<StopwatchTicker> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              TimeDuration.fromMilliseconds(
-                      widget.stopwatch.elapsedMilliseconds)
-                  .toTimeString(
+            // Big centred digits, as in Samsung Clock.
+            Center(
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  formatStopwatchTime(widget.stopwatch.elapsedMilliseconds,
                       showMilliseconds: _showMillisecondsSetting.value),
-              style: textTheme.displayLarge?.copyWith(fontSize: 48),
+                  style: textTheme.displayLarge?.copyWith(
+                    fontSize: 68,
+                    fontWeight: FontWeight.w300,
+                    fontFeatures: const [FontFeature.tabularFigures()],
+                  ),
+                ),
+              ),
             ),
+            const SizedBox(height: 8),
             if (_showPreviousLapBarSetting.value) ...[
               const SizedBox(height: 8),
               LapComparer(
@@ -137,4 +147,15 @@ class _StopwatchTickerState extends State<StopwatchTicker> {
       ),
     );
   }
+}
+
+/// Samsung Clock style stopwatch readout: always shows minutes and seconds
+/// with two digits ("00:00.00"), and hours only once they are reached.
+String formatStopwatchTime(int elapsedMilliseconds,
+    {bool showMilliseconds = true}) {
+  final d = TimeDuration.fromMilliseconds(elapsedMilliseconds);
+  String two(int n) => n.toString().padLeft(2, "0");
+  final hours = d.hours > 0 ? '${two(d.hours)}:' : '';
+  final centis = showMilliseconds ? '.${two(d.milliseconds ~/ 10)}' : '';
+  return '$hours${two(d.minutes)}:${two(d.seconds)}$centis';
 }

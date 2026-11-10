@@ -14,6 +14,16 @@ import 'package:clock_app/icons/flux_icons.dart';
 import 'package:clock_app/navigation/widgets/large_header.dart';
 import 'package:clock_app/system/logic/reliability.dart';
 import 'package:clock_app/system/screens/reliability_screen.dart';
+import 'package:clock_app/clock/data/default_favorite_cities.dart';
+import 'package:clock_app/clock/screens/clock_screen.dart';
+import 'package:clock_app/common/utils/list_storage.dart';
+import 'package:clock_app/navigation/widgets/app_navigation_bar.dart';
+import 'package:clock_app/stopwatch/screens/stopwatch_screen.dart';
+import 'package:clock_app/stopwatch/types/stopwatch.dart';
+import 'package:clock_app/timer/screens/timer_screen.dart';
+import 'package:clock_app/timer/types/timer.dart';
+import 'package:clock_app/timer/types/time_duration.dart' as ctime;
+import 'package:timezone/data/latest_all.dart' as tzdata;
 import 'package:clock_app/theme/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -49,6 +59,34 @@ Widget _app(Widget home, {ThemeData? theme}) => MaterialApp(
       home: home,
     );
 
+Widget _tabScaffold(
+    {required int index,
+    required String title,
+    String? subtitle,
+    required Widget body,
+    double collapse = 0}) {
+  const expanded = 274.0; // about a third of a 915 dp tall phone
+  return Builder(builder: (context) {
+    return Scaffold(
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(expanded - (expanded - 56) * collapse),
+        child: LargeHeader(
+          title: title,
+          subtitle: subtitle,
+          collapse: collapse,
+          expandedHeight: expanded,
+          actions: [
+            IconButton(onPressed: () {}, icon: const Icon(FluxIcons.settings))
+          ],
+        ),
+      ),
+      body: body,
+      bottomNavigationBar:
+          AppNavigationBar(selectedTabIndex: index, onTabSelected: (_) {}),
+    );
+  });
+}
+
 Widget _alarmTab(double collapse) {
   final alarms = [
     Alarm(const Time(hour: 6, minute: 30)),
@@ -57,19 +95,19 @@ Widget _alarmTab(double collapse) {
     Alarm(const Time(hour: 22, minute: 0)),
   ];
   return Builder(builder: (context) {
-    return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: Size.fromHeight(152 - 96 * collapse),
-        child: LargeHeader(
-          title: "Alarm",
-          subtitle: "Alarm in 8 hours 12 minutes",
-          collapse: collapse,
-          expandedHeight: 152,
-          actions: [
-            IconButton(onPressed: () {}, icon: const Icon(FluxIcons.settings))
-          ],
-        ),
-      ),
+    final schedule = alarms[1].settings.getGroup("Schedule");
+    final type = schedule.getSetting("Type");
+    type.setValueWithoutNotify(2); // weekly
+    schedule
+        .getSetting("Week Days")
+        .setValueWithoutNotify([true, false, true, false, true, false, false]);
+    alarms[2].settings.getGroup("Schedule").getSetting("Type")
+        .setValueWithoutNotify(1); // daily
+    return _tabScaffold(
+      index: 0,
+      title: "Alarm",
+      subtitle: "Alarm in 8 hours 12 minutes",
+      collapse: collapse,
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 16),
         children: [
@@ -89,17 +127,6 @@ Widget _alarmTab(double collapse) {
             ),
         ],
       ),
-      bottomNavigationBar: NavigationBar(
-        labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-        selectedIndex: 0,
-        destinations: const [
-          NavigationDestination(icon: Icon(FluxIcons.alarm), label: "Alarm"),
-          NavigationDestination(icon: Icon(FluxIcons.clock), label: "Clock"),
-          NavigationDestination(
-              icon: Icon(FluxIcons.stopwatch), label: "Stopwatch"),
-          NavigationDestination(icon: Icon(FluxIcons.timer), label: "Timer"),
-        ],
-      ),
     );
   });
 }
@@ -115,6 +142,16 @@ void main() {
     File('${getAppDataDirectoryPathSync()}/ringtones.txt').writeAsStringSync(
         '[{"id":1,"title":"Default","uri":"default","isDeletable":false,"type":"FileItemType.audio"}]');
     File('${getAppDataDirectoryPathSync()}/tags.txt').writeAsStringSync('[]');
+    tzdata.initializeTimeZones();
+    File('${getAppDataDirectoryPathSync()}/timer_presets.txt')
+        .writeAsStringSync('[]');
+    await saveList<ClockStopwatch>('stopwatches', [ClockStopwatch()]);
+    final t1 = ClockTimer(const ctime.TimeDuration(minutes: 5))
+      ..setSettingWithoutNotify("Label", "Tea");
+    final t2 = ClockTimer(const ctime.TimeDuration(minutes: 25))
+      ..setSettingWithoutNotify("Label", "Focus");
+    await saveList<ClockTimer>('timers', [t1, t2]);
+    await saveList('favorite_cities', initialFavoriteCities.take(3).toList());
     await _loadFont('Rubik', ['fonts/Rubik/Rubik-VariableFont.ttf']);
     await _loadFont('FluxIcons', ['fonts/FluxIcons.ttf']);
     final flutterRoot = Platform.environment['FLUTTER_ROOT'];
@@ -168,12 +205,38 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
   }, skip: !enabled);
 
+  testWidgets('stopwatch', (tester) async {
+    await shoot(
+        tester,
+        _app(_tabScaffold(
+            index: 2, title: "Stopwatch", body: const StopwatchScreen())),
+        'stopwatch');
+  }, skip: !enabled);
+
+  testWidgets('timer', (tester) async {
+    await shoot(
+        tester,
+        _app(_tabScaffold(index: 3, title: "Timer", body: const TimerScreen())),
+        'timer');
+  }, skip: !enabled);
+
+  testWidgets('world clock', (tester) async {
+    await shoot(
+        tester,
+        _app(_tabScaffold(
+            index: 1,
+            title: "Clock",
+            subtitle: "Tuesday, November 10",
+            body: const ClockScreen())),
+        'world_clock');
+  }, skip: !enabled);
+
   testWidgets('reliability setup screen', (tester) async {
     await shoot(
         tester,
         _app(ReliabilityScreen(service: _ShotReliabilityService())),
         'reliability_setup',
-        size: const Size(412, 1250));
+        size: const Size(412, 1500));
   }, skip: !enabled);
 
   test('editor places every alarm setting', () {

@@ -2,6 +2,27 @@
 
 All changes in this custom build. Upstream changes are listed in the [upstream repository](https://github.com/vicolo-dev/chrono/releases).
 
+## 0.6.0-custom.1, versionCode 30 (pre-release 3)
+
+Samsung Clock design (replaces the earlier mix with Apple Clock):
+- Large centred tab titles that take about a third of the screen and collapse on scroll.
+- Rounded bottom tab bar with text tabs and a highlight on the current tab. Swiping switches tabs on new installs.
+- Alarm cards show the label, a large time with a small AM/PM, and S M T W T F S with the active days highlighted.
+- Press and hold in a list to enter select mode with round check boxes and a bottom bar (All, Delete, Cancel).
+- Add and edit alarm screen rebuilt: time wheels with AM/PM, day buttons, Alarm name field, Alarm sound / Vibration / Snooze rows with summaries and switches, Advanced section for the rest, Cancel and Save at the bottom.
+- Stopwatch with large 00:00.00 digits and wide round Start, Lap, Stop, Reset and Resume buttons.
+- Timers with a circular ring and round play/pause and reset buttons.
+- Larger city names and times in the world clock.
+- New default colour schemes "One UI" and "One UI Dark" for new installs.
+
+Vibration feedback:
+- Short vibrations on time wheel ticks, switches, day buttons, press-and-hold selection, tab changes, stopwatch and timer buttons, the add button, and swipe actions.
+- Follows Android's touch feedback setting. New setting Settings, Accessibility, Vibration feedback (on by default).
+
+Other:
+- versionCode raised to 30.
+- New tests for the day buttons, the vibration setting and the stopwatch format. Screenshot test also renders the stopwatch, timer and world clock.
+
 ## 0.6.0-custom.1, versionCode 29 (pre-release 2)
 
 Alarm reliability:

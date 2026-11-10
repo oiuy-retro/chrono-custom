@@ -227,6 +227,9 @@ SettingGroup generalSettingsSchema = SettingGroup(
                 AppLocalizations.of(context)!.swipeActionSwitchTabsDescription,
           )
         ],
+        // Chrono Custom: swipe between tabs like Samsung Clock; card swipe
+        // actions are still available as an option. New installs only.
+        defaultValue: 1,
       ),
       SelectSetting(
         "Long Press Action",

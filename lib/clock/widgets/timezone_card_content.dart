@@ -29,7 +29,8 @@ class TimezoneCardContent extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w500,
                         color: textColor,
                       ),
                   maxLines: 1,
@@ -59,7 +60,7 @@ class TimezoneCardContent extends StatelessWidget {
             children: [
               DigitalClock(
                 timezoneLocation: timezoneLocation,
-                scale: 0.3,
+                scale: 0.45,
                 color: textColor,
               ),
             ],

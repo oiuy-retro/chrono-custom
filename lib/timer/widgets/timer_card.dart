@@ -6,6 +6,7 @@ import 'package:clock_app/common/widgets/card_edit_menu.dart';
 import 'package:clock_app/timer/types/time_duration.dart';
 import 'package:clock_app/timer/types/timer.dart';
 import 'package:clock_app/timer/widgets/timer_progress_bar.dart';
+import 'package:clock_app/common/utils/haptics.dart';
 import 'package:flutter/material.dart';
 
 class TimerCard extends StatefulWidget {
@@ -86,57 +87,87 @@ class _TimerCardState extends State<TimerCard> {
       _previousTimer = ClockTimer.from(widget.timer);
     }
 
+    // Samsung Clock style: circular progress ring with the remaining time
+    // inside, label above, and round play/pause and reset buttons.
+    final String timeText =
+        TimeDuration.fromSeconds(remainingSeconds).toTimeString();
+    Widget roundButton(IconData icon, VoidCallback onTap, {bool primary = false}) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 4),
+        child: Material(
+          color: primary
+              ? colorScheme.primary
+              : colorScheme.onSurface.withOpacity(0.08),
+          shape: const CircleBorder(),
+          child: InkWell(
+            customBorder: const CircleBorder(),
+            onTap: () {
+              Haptics.button();
+              onTap();
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Icon(icon,
+                  size: 26,
+                  color: primary ? colorScheme.onPrimary : colorScheme.onSurface),
+            ),
+          ),
+        ),
+      );
+    }
+
     return Padding(
         padding: const EdgeInsets.only(
-            left: 16.0, right: 8.0, top: 16.0, bottom: 16.0),
+            left: 16.0, right: 4.0, top: 16.0, bottom: 16.0),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             TimerProgressBar(
                 timer: widget.timer,
-                size: 50,
-                centerWidget: GestureDetector(
-                  onTap: () {
-                    widget.onToggleState();
-                    updateTimer();
-                  },
-                  child: widget.timer.isRunning
-                      ? Icon(
-                          Icons.pause_rounded,
-                          color: colorScheme.primary,
-                          size: 32,
-                        )
-                      : Icon(
-                          Icons.play_arrow_rounded,
-                          color: colorScheme.onSurface.withOpacity(0.6),
-                          size: 32,
-                        ),
+                size: 104,
+                centerWidget: Padding(
+                  padding: const EdgeInsets.all(14),
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      timeText,
+                      style: textTheme.displaySmall?.copyWith(
+                        fontWeight: FontWeight.w400,
+                        color: colorScheme.onSurface,
+                      ),
+                    ),
+                  ),
                 )),
             const SizedBox(width: 16),
             Expanded(
-              flex: 999,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     widget.timer.label,
-                    style: textTheme.displaySmall?.copyWith(
-                      color: colorScheme.onBackground.withOpacity(0.6),
+                    style: textTheme.titleMedium?.copyWith(
+                      color: colorScheme.onSurface.withOpacity(0.7),
                     ),
-                    maxLines: 1,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    softWrap: false,
                   ),
-                  Text(
-                    TimeDuration.fromSeconds(remainingSeconds).toTimeString(),
-                    style: textTheme.displayMedium?.copyWith(
-                      fontSize: remainingSeconds > 3600 ? 28 : 40,
-                    ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      roundButton(
+                          widget.timer.isRunning
+                              ? Icons.pause_rounded
+                              : Icons.play_arrow_rounded, () {
+                        widget.onToggleState();
+                        updateTimer();
+                      }, primary: true),
+                      if (!widget.timer.isStopped)
+                        roundButton(Icons.replay_rounded, widget.onPressReset),
+                    ],
                   ),
                 ],
               ),
             ),
-            const Spacer(),
             CardEditMenu(actions: [
               if (!widget.timer.isStopped)
                 MenuAction(

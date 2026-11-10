@@ -17,8 +17,11 @@ import 'package:clock_app/theme/types/style_theme.dart';
 import 'package:clock_app/theme/types/theme_extension.dart';
 import 'package:flutter/material.dart';
 
-ColorSchemeData defaultColorScheme = defaultColorSchemes[0];
-ColorSchemeData defaultDarkColorScheme = defaultColorSchemes[2];
+// Chrono Custom: One UI colours by default on new installs.
+ColorSchemeData defaultColorScheme =
+    defaultColorSchemes.firstWhere((s) => s.name == 'One UI');
+ColorSchemeData defaultDarkColorScheme =
+    defaultColorSchemes.firstWhere((s) => s.name == 'One UI Dark');
 StyleTheme defaultStyleTheme = defaultStyleThemes[0];
 
 ThemeData defaultTheme = ThemeData(

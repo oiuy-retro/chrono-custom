@@ -1,42 +1,50 @@
 # Chrono Custom
 
-An Android alarm, world clock, stopwatch and timer app with a redesigned interface that mixes the look of Samsung Clock (One UI) and Apple Clock (iOS).
+An Android alarm, world clock, stopwatch and timer app with an interface redesigned to look and feel like Samsung Clock (One UI), including Samsung-style vibration feedback.
 
 > This is an unofficial custom build based on [Chrono](https://github.com/vicolo-dev/chrono) by [Vicolo and its contributors](https://github.com/vicolo-dev/chrono/graphs/contributors), licensed under the [GNU General Public License v3.0](LICENSE). It is not affiliated with or supported by the Chrono developers. Please do not report problems with this build to the upstream project. For a plain description of the original app, see [docs/ABOUT_CHRONO.md](docs/ABOUT_CHRONO.md).
 
 - Upstream base: `vicolo-dev/chrono` branch `master`, commit `9e30f243271a27e79573e2b2d3da10159419eb8e` (four commits after tag `v0.6.0`)
-- App version: `0.6.0-custom.1`, versionCode `29`
+- App version: `0.6.0-custom.1`, versionCode `30`
 - Application ID: `com.oiuyretro.chrono` (upstream is `com.vicolo.chrono`)
 - Build flavor: `prod`, release build type
 - Change history: [CHANGELOG.md](CHANGELOG.md)
 
 ## What's different from upstream
 
-All upstream features and settings are kept. The changes are to layout and navigation. Details are in [docs/CUSTOM_CHANGES.md](docs/CUSTOM_CHANGES.md).
+All upstream features and settings are kept, and saved alarms and backups still work. The changes are to layout, navigation and touch feedback. Details are in [docs/CUSTOM_CHANGES.md](docs/CUSTOM_CHANGES.md).
 
-### 1. Large collapsing headers
+### 1. Samsung-style headers and tabs
 
-Each tab has a large title at the top. On the Alarm tab it also shows how long until the next alarm (for example "Alarm in 8 hours 12 minutes") or "All alarms are off". On the Clock tab it shows today's date. When you scroll the list, the header shrinks to a normal toolbar.
+Each tab opens with a large centred title that takes up about the top third of the screen, as in Samsung Clock. On the Alarm tab it also shows how long until the next alarm (for example "Alarm in 8 hours 12 minutes") or "All alarms are off". On the Clock tab it shows today's date. When you scroll, the title shrinks into a normal toolbar. The tabs (Alarm, Clock, Stopwatch, Timer) sit in a rounded bar at the bottom, with the current tab highlighted. On new installs, swiping left or right switches tabs. The Material navigation bar is still available under the "Use Material Style" setting.
 
-### 2. Bottom navigation
+### 2. Alarm list
 
-The tabs are in the order Alarm, Clock, Stopwatch, Timer, and every tab always shows its label.
+Each alarm is a rounded card showing the label, a large time with a smaller AM/PM, and the repeat days as the letters S M T W T F S with the active days in blue. One-time alarms show their date instead. The on/off switch is on the right and the menu next to it still has Skip, Duplicate and Delete. Press and hold an alarm to enter select mode: round check boxes appear, the add button hides, and a bar at the bottom offers All, Delete and Cancel.
 
-### 3. Alarm list
+### 3. Add and edit alarm screen
 
-Each alarm shows a large time, then its label and schedule, with the on/off switch on the right. The menu next to the switch still has Skip, Duplicate and Delete.
+Tapping the add button opens the alarm screen straight away. At the top is a scroll-wheel time picker with an AM/PM wheel. Below it, in rounded cards: the repeat summary with a calendar button for other repeat types (dates, ranges, intervals), the day buttons S M T W T F S, and an Alarm name field; then rows for Alarm sound, Vibration and Snooze, each with a short summary and a switch where it applies (tap a row for its full settings); then the dismiss task. Every other alarm setting is in a collapsed Advanced section, so nothing was removed. Cancel and Save are at the bottom of the screen.
 
-### 4. Add and edit alarm screen
+### 4. Stopwatch, timer and world clock
 
-Tapping the add button opens the alarm screen straight away, with a large scroll-wheel time picker at the top. Below it, the settings are grouped into plain sections: Label, Repeat, Sound, Vibration, Snooze and Dismiss task. Less common options (random melody start position, volume while doing a task, snooze rules, tags) are in a collapsed Advanced section. Any alarm setting that is not placed in a named section is added to Advanced automatically, so no setting is hidden.
+The stopwatch shows large digits in the Samsung format (00:00.00) with wide round buttons at the bottom: Start, then Lap and Stop, then Reset and Resume. Each timer shows a circular progress ring with the time inside and round play/pause and reset buttons. World clock cities show the city name and time in larger type.
 
-### 5. Alarm reliability setup
+### 5. Vibration feedback
+
+Like Samsung Clock, the app gives a short vibration when you turn the time wheels, flip a switch, tap a day button, press and hold to select, switch tabs, press stopwatch and timer buttons, add an alarm, or swipe to delete. It follows Android's "Touch feedback" setting, and it can be turned off in the app under Settings, Accessibility, Vibration feedback (on by default).
+
+### 6. One UI colours
+
+New installs use a light grey background with white cards and a blue accent ("One UI"), and a black background with dark grey cards in dark mode ("One UI Dark"). Material You colours still work if you turn them on in the theme settings. Existing installs keep their chosen colours.
+
+### 7. Alarm reliability setup
 
 A setup screen lists every system setting that can stop alarms from ringing, each with a green check or a red "Needs fixing" status and a Fix button. One "Fix all" button opens the unmet ones in order, and the status is re-checked each time you return to the app. On Samsung phones the screen is called "Set up for Samsung" and adds two items that Android cannot check (battery usage set to Unrestricted, and Never sleeping apps); you open them from the screen and tick Done yourself. The screen opens by itself on first launch, a warning banner appears on the Alarm tab while any item is not OK, and it is always available under Settings, General, Reliability.
 
 New installs also have the foreground notification and the background service turned on by default, which help keep alarms scheduled. Existing saved settings are not changed.
 
-### 6. Installs alongside the official app
+### 8. Installs alongside the official app
 
 The application ID is `com.oiuyretro.chrono` and the app is named "Chrono Custom", so it can be installed next to the official Chrono. The two apps do not share alarms or settings.
 
@@ -64,9 +72,12 @@ Without a `keystore.properties` file the release APK is built unsigned. The debu
 
 ## Known limitations
 
-- Only the English text for the new labels (Repeat, Advanced, Dismiss task, the header lines) exists. Other languages show these few labels in English until they are translated. All other text uses the existing translations.
+- Only English text exists for the new labels (for example Repeat, Advanced, Alarm sound, Select all, the stopwatch buttons and the header lines). Other languages show these labels in English until they are translated. All other text uses the existing translations.
 - The scroll-wheel picker replaces the add-alarm time dialog. The "Time picker" style setting still applies to the other time dialogs in the app.
-- Screens other than the alarm list and alarm editor (timer, stopwatch, clock, settings) keep their upstream layout apart from the new header and navigation bar.
+- The settings screens keep their upstream layout.
+- The app uses its existing Rubik font, not Samsung's own font.
+- The new colours and the swipe-to-switch-tabs default only apply to new installs.
+- Vibration feedback only works if Android's touch feedback is on and the phone has a vibration motor.
 - Samsung's own battery settings (Unrestricted battery usage, Never sleeping apps, Put unused apps to sleep) cannot be read or changed by an app. The setup screen opens the right Samsung screen where possible (falling back to App info or Android's battery settings) and relies on you to tick Done.
 - The foreground notification that is now on by default stays in the notification shade. It can be turned off in Settings, General, Reliability.
 - `flutter analyze` reports two errors in `lib/settings/screens/list_filter_settings_screen.dart`. They come from upstream; the file is not used by the app and the build is not affected.

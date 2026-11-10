@@ -23,6 +23,7 @@ import 'package:clock_app/system/logic/quick_actions.dart';
 import 'package:clock_app/theme/types/theme_extension.dart';
 import 'package:clock_app/system/logic/reliability.dart';
 import 'package:clock_app/system/screens/reliability_screen.dart';
+import 'package:clock_app/common/utils/haptics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -80,9 +81,11 @@ class _NavScaffoldState extends State<NavScaffold> {
   final Map<int, double> _scrollOffsets = {};
   Timer? _headerTimer;
 
-  static const double _expandedHeaderHeight = 152;
+  // One UI: the expanded app bar takes roughly the top third of the screen.
+  double _expandedHeaderHeight = 220;
   static const double _collapsedHeaderHeight = 56;
-  static const double _collapseDistance = 96;
+  double get _collapseDistance =>
+      _expandedHeaderHeight - _collapsedHeaderHeight;
 
   bool _handleScrollNotification(ScrollNotification notification) {
     if (notification.metrics.axis != Axis.vertical) return false;
@@ -139,6 +142,7 @@ class _NavScaffoldState extends State<NavScaffold> {
 
   void _onTabSelected(int index, [String? tabInitAction]) {
     ScaffoldMessenger.of(context).removeCurrentSnackBar();
+    if (index != _selectedTabIndex) Haptics.toggle();
 
     setState(() {
       _controller.jumpToPage(index);
@@ -153,6 +157,7 @@ class _NavScaffoldState extends State<NavScaffold> {
   }
 
   void _handlePageViewChanged(int currentPageIndex) {
+    if (currentPageIndex != _selectedTabIndex) Haptics.toggle();
     setState(() {
       _selectedTabIndex = currentPageIndex;
     });
@@ -282,6 +287,10 @@ class _NavScaffoldState extends State<NavScaffold> {
             .get(Theme.of(context).brightness == Brightness.light ? 96 : 15))
         : colorScheme.surface;
 
+    final Size screenSize = MediaQuery.of(context).size;
+    _expandedHeaderHeight = orientation == Orientation.portrait
+        ? (screenSize.height * 0.3).clamp(160.0, 320.0)
+        : _collapsedHeaderHeight;
     final double collapse =
         ((_scrollOffsets[_selectedTabIndex] ?? 0) / _collapseDistance)
             .clamp(0.0, 1.0);
