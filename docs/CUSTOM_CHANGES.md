@@ -67,16 +67,30 @@ This replaces the earlier mix of Samsung and Apple styles.
 - Vibration added in: `spinner_time_picker.dart` (each wheel tick), `switch_field.dart`, `toggle_field.dart`, the day buttons, `custom_list_view.dart` (press and hold, select), `action_pane.dart` (swipe delete and duplicate), `fab.dart`, the stopwatch and timer buttons, and tab changes.
 - `lib/l10n/app_en.arb`: new English strings for the above.
 
+## Alarm order and dark mode (pre-release 4)
+
+- New `lib/alarm/logic/alarm_sort_default.dart`: `initAlarmSortDefault()`, called from `initializeStorage()` in `lib/settings/logic/initialize_settings.dart`. The sort choice lives in the `alarms-sort-index` file (0 = upstream "Default", the order alarms were added in; 5 = "Early hours first"). A new install, or an install still on 0, is set to 5 once; a marker file `alarms-sort-time-of-day-v1` stops it from running again, so later choices are respected.
+- `lib/common/widgets/list/custom_list_view.dart`: sorting is stable (ties keep the saved order). New `showSortControl` option, passed through `persistent_list_view.dart` and `list_filter_bar.dart`, hides the Sort chip without turning sorting off.
+- `lib/alarm/screens/alarm_screen.dart`: always passes the sort options; "Show Sort" only controls `showSortControl`.
+- `lib/settings/data/settings_schema.dart`: new root setting "Theme" (System default / Light / Dark, stored as an index, default 0). `lib/app.dart` uses it for `themeMode` in both the Material You and the colour scheme paths, and always uses "Dark Color Scheme" for dark mode.
+- `lib/theme/data/appearance_settings_schema.dart`: "Brightness" and "System Dark Mode" are hidden (`isVisual: false`) but kept so saved settings and backups load. "Dark Color Scheme" no longer depends on "System Dark Mode".
+- New `lib/theme/logic/theme_migration.dart`: `migrateThemeSettings()`, run once after settings load (GetStorage flag `chrono_custom_theme_migrated_v1`). It sets the dark scheme to One UI Dark unless "System Dark Mode" was on, carries an explicit Material You Light/Dark choice over to Theme, and adds the One UI schemes to the saved scheme list if missing.
+- `lib/theme/types/color_scheme.dart`: `getColorScheme()` sets `Brightness.dark` when the background is dark (it was always light), so Flutter's built-in widgets pick readable colours.
+- `lib/theme/utils/color_scheme.dart`: `getTheme()` sets the default icon colour from the scheme. New `withDistinctCards()` gives Material You schemes a page colour and a separate card colour (used in `app.dart`).
+- `lib/alarm/screens/alarm_editor_screen.dart`: the Alarm name field is underlined with no fill.
+- `lib/l10n/app_en.arb`: `themeSetting`, `themeSettingDescription`, `themeSystemDefault`, `themeLight`, `themeDark`.
+
 ## Packaging and build
 - `android/app/build.gradle`: application ID `com.oiuyretro.chrono`; app name "Chrono Custom"; release signing from `CHRONO_KEYSTORE_PROPERTIES` or `android/keystore.properties`, unsigned if neither exists. The Kotlin package and method channel names are still `com.vicolo.chrono`; they are internal and do not affect installation.
 - `android/keystore.properties.example`: template for the signing file.
 - `android/settings.gradle`: adds `com.android.tools:r8:8.3.37` to the settings build script classpath. The D8 bundled with Android Gradle Plugin 7.4.2 fails with a NullPointerException on libraries compiled with JDK 21 (AndroidX lifecycle 2.8.x, tsbackgroundfetch 4.1.1).
 - `android/gradle.properties`: Gradle heap raised from 1.5 GB to 4 GB.
-- `pubspec.yaml`: version `0.6.0-custom.1+30`; `path_provider_platform_interface` and `plugin_platform_interface` added as dev dependencies for the screenshot test.
+- `pubspec.yaml`: version `0.6.0-custom.1+31`; `path_provider_platform_interface` and `plugin_platform_interface` added as dev dependencies for the screenshot test.
 - `.gitignore`: signing files and `test/screenshots/goldens/`.
 
 ## Tests
 - New `test/screenshots/redesign_screenshots_test.dart` (also renders the reliability screen).
 - New `test/alarm/logic/day_chips_test.dart` (day button rules and the vibration setting) and `test/stopwatch/stopwatch_format_test.dart`.
-- The screenshot test also renders the stopwatch, timer and world clock.
+- The screenshot test also renders the stopwatch, timer and world clock, and dark versions of the main screens, settings and the ringing screen.
+- New `test/alarm/logic/alarm_sort_test.dart` and `test/theme/theme_dark_test.dart`.
 - New `test/system/reliability_test.dart`: item list per Android version and maker, Samsung title, and the Fix all order.

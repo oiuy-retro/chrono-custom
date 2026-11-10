@@ -2,6 +2,26 @@
 
 All changes in this custom build. Upstream changes are listed in the [upstream repository](https://github.com/vicolo-dev/chrono/releases).
 
+## 0.6.0-custom.1, versionCode 31 (pre-release 4)
+
+Alarm order:
+- The alarm list is sorted by time of day, earliest first, by default and stays sorted when alarms are added or changed. Before this, the default was upstream's "Default" order (the order alarms were added in).
+- Existing installs on "Default" are switched once; any other sort you had picked is kept. The Sort button above the list still offers every order, including "Default".
+- "Show Sort" now only hides the Sort button; the list is still sorted.
+- Alarms with the same time keep a steady order (stable sort).
+
+Dark mode:
+- New "Theme" setting at the top of Settings: System default (follows the phone), Light or Dark. Default System default.
+- Dark mode uses the One UI Dark scheme (black page, dark grey cards). It works with and without Material You.
+- Dark schemes are now reported to Flutter as dark, so check boxes, text fields, dialogs and icons use light-on-dark colours.
+- Material You cards use a lighter or darker shade than the page so they stay visible.
+- The old "System Dark Mode" and "Brightness" settings are hidden and replaced by Theme; they are still read from backups. Existing installs move to One UI Dark once unless a custom dark scheme was in use. The One UI schemes are added to the scheme list on existing installs.
+- Alarm name field on the alarm screen is a plain underlined field with a readable hint in light and dark.
+
+Other:
+- versionCode raised to 31.
+- New tests for the alarm order (default, one-time switch, live sorting) and for dark mode (Theme default, dark scheme brightness, migration, Material You cards). Screenshot test renders dark versions of every main screen, the settings screen and the ringing screen.
+
 ## 0.6.0-custom.1, versionCode 30 (pre-release 3)
 
 Samsung Clock design (replaces the earlier mix with Apple Clock):

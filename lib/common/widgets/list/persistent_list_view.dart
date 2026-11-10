@@ -77,6 +77,7 @@ class PersistentListView<Item extends ListItem> extends StatefulWidget {
     this.listFilters = const [],
     this.customActions = const [],
     this.sortOptions = const [],
+    this.showSortControl = true,
     this.header,
     this.onSaveItems ,
     // this.initialSortIndex = 0,
@@ -101,6 +102,7 @@ class PersistentListView<Item extends ListItem> extends StatefulWidget {
   final List<ListFilterItem<Item>> listFilters;
   final List<ListFilterCustomAction<Item>> customActions;
   final List<ListSortOption<Item>> sortOptions;
+  final bool showSortControl;
   final Function(List<Item> items)? onSaveItems;
 
   @override
@@ -194,6 +196,7 @@ class _PersistentListViewState<Item extends ListItem>
       listFilters: widget.listFilters,
       customActions: widget.customActions,
       sortOptions: widget.sortOptions,
+      showSortControl: widget.showSortControl,
       initialSortIndex: _initialSortIndex,
       onChangeSortIndex: _handleChangeSort,
       header: widget.header,

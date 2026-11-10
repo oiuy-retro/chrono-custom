@@ -41,6 +41,7 @@ class CustomListView<Item extends ListItem> extends StatefulWidget {
     this.customActions = const [],
     this.sortOptions = const [],
     this.initialSortIndex = 0,
+    this.showSortControl = true,
     this.onChangeSortIndex,
     this.header,
   });
@@ -59,6 +60,8 @@ class CustomListView<Item extends ListItem> extends StatefulWidget {
   final bool isDeleteEnabled;
   final bool isDuplicateEnabled;
   final int initialSortIndex;
+  // When false the list is still sorted, but the Sort chip is hidden.
+  final bool showSortControl;
   final bool shouldInsertOnTop;
   final List<ListFilterItem<Item>> listFilters;
   final List<ListFilterCustomAction<Item>> customActions;
@@ -131,9 +134,17 @@ class _CustomListViewState<Item extends ListItem>
     }
     currentList.clear();
     if (_selectedSortIndex != 0) {
-      final temp = [...widget.items];
-      temp.sort(widget.sortOptions[_selectedSortIndex - 1].sortFunction);
-      currentList.addAll(temp);
+      // Stable sort: items that compare equal keep their saved order, so
+      // alarms set to the same time do not swap places on every update.
+      final compare = widget.sortOptions[_selectedSortIndex - 1].sortFunction;
+      final indexed = [
+        for (int i = 0; i < widget.items.length; i++) (i, widget.items[i])
+      ];
+      indexed.sort((a, b) {
+        final result = compare(a.$2, b.$2);
+        return result != 0 ? result : a.$1.compareTo(b.$1);
+      });
+      currentList.addAll(indexed.map((e) => e.$2));
     } else {
       currentList.addAll(widget.items);
     }
@@ -377,6 +388,7 @@ class _CustomListViewState<Item extends ListItem>
           listFilters: widget.listFilters,
           customActions: widget.customActions,
           sortOptions: widget.sortOptions,
+          showSortControl: widget.showSortControl,
           isSelecting: _isSelecting,
           handleCustomAction: _handleCustomAction,
           handleEndSelection: _endSelection,

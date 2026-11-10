@@ -151,10 +151,12 @@ class _AppState extends State<App> {
           appDarkColorScheme = darkDynamic;
         }
       }
-      lightTheme =
-          getTheme(colorScheme: applightColorScheme, styleTheme: styleTheme);
-      darkTheme =
-          getTheme(colorScheme: appDarkColorScheme, styleTheme: styleTheme);
+      lightTheme = getTheme(
+          colorScheme: withDistinctCards(applightColorScheme),
+          styleTheme: styleTheme);
+      darkTheme = getTheme(
+          colorScheme: withDistinctCards(appDarkColorScheme),
+          styleTheme: styleTheme);
       return AppTheme(lightTheme: lightTheme, darkTheme: darkTheme);
     } else {
       ColorSchemeData colorSchemeData =
@@ -166,10 +168,8 @@ class _AppState extends State<App> {
         colorSchemeData.accent = overrideColor;
         darkColorSchemeData.accent = overrideColor;
       }
-      bool systemDarkMode = _colorSettings.getSetting("System Dark Mode").value;
-      if (!systemDarkMode) {
-        darkColorSchemeData = colorSchemeData;
-      }
+      // Chrono Custom: the dark scheme is always used in dark mode; whether
+      // the app is dark is decided by the "Theme" setting.
       lightTheme =
           getTheme(colorSchemeData: colorSchemeData, styleTheme: styleTheme);
       darkTheme = getTheme(
@@ -183,8 +183,7 @@ class _AppState extends State<App> {
     return DynamicColorBuilder(
         builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
       final AppTheme appTheme = getAppTheme(lightDynamic, darkDynamic);
-      ThemeBrightness themeBrightness =
-          _colorSettings.getSetting("Brightness").value;
+      ThemeBrightness themeBrightness = appSettings.getSetting("Theme").value;
       Locale locale = _generalSettings.getSetting("Language").value;
 
       return MaterialApp(

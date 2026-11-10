@@ -344,6 +344,18 @@ class _AlarmEditorBodyState extends State<_AlarmEditorBody> {
               textCapitalization: TextCapitalization.sentences,
               decoration: InputDecoration(
                 hintText: l10n.alarmNameHint,
+                // Samsung style: a plain underlined field, no grey fill.
+                filled: false,
+                contentPadding: const EdgeInsets.symmetric(vertical: 10),
+                hintStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    color: colorScheme.onSurface.withOpacity(0.45),
+                    fontWeight: FontWeight.w400),
+                enabledBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(
+                        color: colorScheme.onSurface.withOpacity(0.2))),
+                focusedBorder: UnderlineInputBorder(
+                    borderSide:
+                        BorderSide(color: colorScheme.primary, width: 2)),
                 border: UnderlineInputBorder(
                     borderSide: BorderSide(
                         color: colorScheme.onSurface.withOpacity(0.2))),

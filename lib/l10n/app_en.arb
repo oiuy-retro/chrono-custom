@@ -892,5 +892,15 @@
   "alarmNameHint": "Alarm name",
   "@alarmNameHint": {},
   "everyDay": "Every day",
-  "@everyDay": {}
+  "@everyDay": {},
+  "themeSetting": "Theme",
+  "@themeSetting": {},
+  "themeSettingDescription": "System default follows your phone's dark mode",
+  "@themeSettingDescription": {},
+  "themeSystemDefault": "System default",
+  "@themeSystemDefault": {},
+  "themeLight": "Light",
+  "@themeLight": {},
+  "themeDark": "Dark",
+  "@themeDark": {}
 }

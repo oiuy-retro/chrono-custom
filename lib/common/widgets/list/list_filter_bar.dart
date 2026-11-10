@@ -22,12 +22,14 @@ class ListFilterBar<Item extends ListItem> extends StatelessWidget {
       required this.handleFilterChange,
       required this.selectedSortIndex,
       required this.handleSortChange,
-      required this.isDeleteEnabled});
+      required this.isDeleteEnabled,
+      this.showSortControl = true});
 
   final List<ListFilterItem<Item>> listFilters;
   final List<ListFilterCustomAction<Item>> customActions;
   final List<ListSortOption<Item>> sortOptions;
   final bool isSelecting;
+  final bool showSortControl;
   final bool isDeleteEnabled;
   final Function(ListFilterCustomAction<Item>) handleCustomAction;
   final Function handleEndSelection;
@@ -101,7 +103,7 @@ class ListFilterBar<Item extends ListItem> extends StatelessWidget {
       }
       widgets.addAll(listFilters
           .map((filter) => getListFilterChip(filter, handleFilterChange)));
-      if (sortOptions.isNotEmpty) {
+      if (sortOptions.isNotEmpty && showSortControl) {
         widgets.add(
           ListSortChip(
             selectedIndex: selectedSortIndex,

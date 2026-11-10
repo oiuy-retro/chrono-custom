@@ -25,6 +25,11 @@ import 'package:clock_app/timer/types/timer.dart';
 import 'package:clock_app/timer/types/time_duration.dart' as ctime;
 import 'package:timezone/data/latest_all.dart' as tzdata;
 import 'package:clock_app/theme/theme.dart';
+import 'package:clock_app/common/utils/json_serialize.dart';
+import 'package:clock_app/theme/utils/color_scheme.dart';
+import 'package:clock_app/alarm/screens/alarm_notification_screen.dart';
+import 'package:clock_app/settings/data/settings_schema.dart';
+import 'package:clock_app/settings/screens/settings_group_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -76,7 +81,13 @@ Widget _tabScaffold(
           collapse: collapse,
           expandedHeight: expanded,
           actions: [
-            IconButton(onPressed: () {}, icon: const Icon(FluxIcons.settings))
+            IconButton(
+                onPressed: () {},
+                icon: const Icon(FluxIcons.settings),
+                color: Theme.of(context)
+                    .colorScheme
+                    .onSurface
+                    .withOpacity(0.8))
           ],
         ),
       ),
@@ -237,6 +248,96 @@ void main() {
         _app(ReliabilityScreen(service: _ShotReliabilityService())),
         'reliability_setup',
         size: const Size(412, 1500));
+  }, skip: !enabled);
+
+  // Dark mode (One UI Dark scheme, and Material You dark for comparison).
+  ThemeData dark() => getTheme(colorSchemeData: defaultDarkColorScheme);
+  ThemeData materialYouDark() => getTheme(
+      colorScheme: withDistinctCards(ColorScheme.fromSeed(
+          seedColor: const Color(0xFF6A8CAF), brightness: Brightness.dark)));
+
+  testWidgets('dark: alarm list', (tester) async {
+    await shoot(tester, _app(_alarmTab(0), theme: dark()), 'alarm_list_dark');
+  }, skip: !enabled);
+
+  testWidgets('dark: alarm list, Material You', (tester) async {
+    await shoot(tester, _app(_alarmTab(0), theme: materialYouDark()),
+        'alarm_list_materialyou_dark');
+  }, skip: !enabled);
+
+  testWidgets('dark: add alarm', (tester) async {
+    await shoot(
+        tester,
+        _app(
+            AlarmEditorScreen(
+                alarm: Alarm(const Time(hour: 7, minute: 30)),
+                isNewAlarm: true),
+            theme: dark()),
+        'add_alarm_dark');
+  }, skip: !enabled);
+
+  testWidgets('dark: timer', (tester) async {
+    await shoot(
+        tester,
+        _app(_tabScaffold(index: 3, title: "Timer", body: const TimerScreen()),
+            theme: dark()),
+        'timer_dark');
+  }, skip: !enabled);
+
+  testWidgets('dark: stopwatch', (tester) async {
+    await shoot(
+        tester,
+        _app(
+            _tabScaffold(
+                index: 2, title: "Stopwatch", body: const StopwatchScreen()),
+            theme: dark()),
+        'stopwatch_dark');
+  }, skip: !enabled);
+
+  testWidgets('dark: world clock', (tester) async {
+    await shoot(
+        tester,
+        _app(
+            _tabScaffold(
+                index: 1,
+                title: "Clock",
+                subtitle: "Tuesday, November 10",
+                body: const ClockScreen()),
+            theme: dark()),
+        'world_clock_dark');
+  }, skip: !enabled);
+
+  testWidgets('dark: reliability setup', (tester) async {
+    await shoot(
+        tester,
+        _app(ReliabilityScreen(service: _ShotReliabilityService()),
+            theme: dark()),
+        'reliability_setup_dark',
+        size: const Size(412, 1500));
+  }, skip: !enabled);
+
+  testWidgets('dark: settings', (tester) async {
+    await shoot(
+        tester,
+        _app(SettingGroupScreen(settingGroup: appSettings), theme: dark()),
+        'settings_dark',
+        size: const Size(412, 1300));
+  }, skip: !enabled);
+
+  testWidgets('light: settings', (tester) async {
+    await shoot(tester, _app(SettingGroupScreen(settingGroup: appSettings)),
+        'settings', size: const Size(412, 1300));
+  }, skip: !enabled);
+
+  testWidgets('dark: alarm ringing', (tester) async {
+    final alarm = Alarm(const Time(hour: 7, minute: 30))
+      ..setSettingWithoutNotify("Label", "Wake up");
+    // Written directly: the storage queue may be busy with earlier tests.
+    File('${getAppDataDirectoryPathSync()}/alarms.txt')
+        .writeAsStringSync(listToString<Alarm>([alarm]));
+    await shoot(tester,
+        _app(AlarmNotificationScreen(scheduleId: alarm.id), theme: dark()),
+        'alarm_ringing_dark');
   }, skip: !enabled);
 
   test('editor places every alarm setting', () {

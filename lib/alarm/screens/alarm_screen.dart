@@ -287,7 +287,10 @@ class _AlarmScreenState extends State<AlarmScreen> {
           // header: getNextAlarmWidget(),
           listFilters: _getListFilterItems(),
           customActions: _getCustomActions(),
-          sortOptions: _showSort.value ? alarmSortOptions : [],
+          // Always sorted (time of day by default); "Show Sort" only
+          // controls whether the Sort chip is visible.
+          sortOptions: alarmSortOptions,
+          showSortControl: _showSort.value,
         )),
         ]),
         FAB(
