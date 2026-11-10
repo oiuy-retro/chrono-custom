@@ -5,7 +5,7 @@ An Android alarm, world clock, stopwatch and timer app with an interface redesig
 > This is an unofficial custom build based on [Chrono](https://github.com/vicolo-dev/chrono) by [Vicolo and its contributors](https://github.com/vicolo-dev/chrono/graphs/contributors), licensed under the [GNU General Public License v3.0](LICENSE). It is not affiliated with or supported by the Chrono developers. Please do not report problems with this build to the upstream project. For a plain description of the original app, see [docs/ABOUT_CHRONO.md](docs/ABOUT_CHRONO.md).
 
 - Upstream base: `vicolo-dev/chrono` branch `master`, commit `9e30f243271a27e79573e2b2d3da10159419eb8e` (four commits after tag `v0.6.0`)
-- App version: `0.6.0-custom.1`, versionCode `31`
+- App version: `0.6.0-custom.1`, versionCode `32`
 - Application ID: `com.oiuyretro.chrono` (upstream is `com.vicolo.chrono`)
 - Build flavor: `prod`, release build type
 - Change history: [CHANGELOG.md](CHANGELOG.md)
@@ -27,6 +27,8 @@ Each alarm is a rounded card showing the label, a large time with a smaller AM/P
 ### 3. Add and edit alarm screen
 
 Tapping the add button opens the alarm screen straight away. At the top is a scroll-wheel time picker with an AM/PM wheel. Below it, in rounded cards: the repeat summary with a calendar button for other repeat types (dates, ranges, intervals), the day buttons S M T W T F S, and an Alarm name field; then rows for Alarm sound, Vibration and Snooze, each with a short summary and a switch where it applies (tap a row for its full settings); then the dismiss task. Every other alarm setting is in a collapsed Advanced section, so nothing was removed. Cancel and Save are at the bottom of the screen.
+
+Two sound switches sit under Alarm sound. "Start at random point" (on for new alarms) starts the sound somewhere in the middle instead of at the beginning, never in the last 15 seconds or last 20%. "Also ring on phone speaker" (off by default) plays the alarm on the phone's own speaker as well as on connected Bluetooth headphones or a Bluetooth speaker.
 
 ### 4. Stopwatch, timer and world clock
 
@@ -83,6 +85,7 @@ Without a `keystore.properties` file the release APK is built unsigned. The debu
 - The settings screens keep their upstream layout.
 - The app uses its existing Rubik font, not Samsung's own font.
 - The new light colours and the swipe-to-switch-tabs default only apply to new installs. Dark mode and the time-of-day order also apply to existing installs, as described above.
+- "Also ring on phone speaker" has not been tried on a real phone yet. It needs Android 6 or newer, and only Android 9 and newer can force the second copy onto the speaker. See docs/CUSTOM_CHANGES.md for details.
 - Home screen widgets keep the colour chosen in the widget settings and do not switch with dark mode.
 - The splash screen shown while the app starts uses Android's plain black or white background.
 - Vibration feedback only works if Android's touch feedback is on and the phone has a vibration motor.

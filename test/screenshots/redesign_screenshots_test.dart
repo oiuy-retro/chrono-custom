@@ -276,6 +276,22 @@ void main() {
         'add_alarm_dark');
   }, skip: !enabled);
 
+  for (final darkMode in [false, true]) {
+    testWidgets('alarm edit sound switches, dark: $darkMode', (tester) async {
+      await shoot(
+          tester,
+          _app(
+              AlarmEditorScreen(
+                  alarm: Alarm(const Time(hour: 7, minute: 30)),
+                  isNewAlarm: true),
+              theme: darkMode ? dark() : null),
+          darkMode ? 'alarm_edit_sound_switches_dark' : 'alarm_edit_sound_switches',
+          size: const Size(412, 1120));
+      expect(find.text('Start at random point'), findsOneWidget);
+      expect(find.text('Also ring on phone speaker'), findsOneWidget);
+    }, skip: !enabled);
+  }
+
   testWidgets('dark: timer', (tester) async {
     await shoot(
         tester,

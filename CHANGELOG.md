@@ -2,6 +2,20 @@
 
 All changes in this custom build. Upstream changes are listed in the [upstream repository](https://github.com/vicolo-dev/chrono/releases).
 
+## 0.6.0-custom.1, versionCode 32 (pre-release 5)
+
+Alarm sound:
+- New per-alarm switch "Also ring on phone speaker" (off by default), shown under Alarm sound. While Bluetooth audio is connected, the alarm plays on the Bluetooth device and a second copy plays on the phone's built-in speaker. Without Bluetooth only one copy plays, as before.
+- Both copies start at the same point, follow the alarm volume and rising volume, and stop on dismiss and snooze. If Bluetooth disconnects while the alarm rings, the speaker copy keeps playing and the other copy is silenced.
+- "Start at random point" (upstream's "Random position", renamed) is now on the main alarm screen and on by default for new alarms. Existing alarms keep their setting; on existing installs the template for new alarms is switched on once.
+- The random point is never in the last 15 seconds or the last 20% of the sound. Sounds shorter than 20 seconds, or whose length cannot be read, start at the beginning. The sound loops from the beginning after it ends.
+- Rising volume now actually rises. Before, the first volume change cancelled the steps, so the alarm played at full volume straight away.
+- Timers are unchanged (no random start, no speaker copy).
+
+Other:
+- versionCode raised to 32.
+- New tests for the random start point, the new defaults and the speaker channel. Screenshots of the alarm screen with the new switches in light and dark.
+
 ## 0.6.0-custom.1, versionCode 31 (pre-release 4)
 
 Alarm order:

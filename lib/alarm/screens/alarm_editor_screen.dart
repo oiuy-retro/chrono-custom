@@ -263,6 +263,8 @@ class _AlarmEditorBodyState extends State<_AlarmEditorBody> {
     final bool is24Hour = _is24Hour(context);
 
     final Setting vibration = _soundAndVibration.getSetting("Vibration");
+    final Setting randomStart = _sound.getSetting("start_melody_at_random_pos");
+    final Setting speakerCopy = _sound.getSetting("also_ring_on_phone_speaker");
     final Setting snoozeEnabled = _snooze.getSetting("Enabled");
     final String snoozeSummary = snoozeEnabled.value == true
         ? l10n.snoozeRowSummary(
@@ -370,6 +372,18 @@ class _AlarmEditorBodyState extends State<_AlarmEditorBody> {
             title: l10n.alarmSoundRow,
             subtitle: _melodyName(),
             onTap: () => _openGroup(_sound),
+          ),
+          _row(
+            title: l10n.startMelodyAtRandomPos,
+            subtitle: l10n.startMelodyAtRandomPosDescription,
+            switchValue: randomStart.value == true,
+            onSwitch: (v) => randomStart.setValue(context, v),
+          ),
+          _row(
+            title: l10n.alsoRingOnSpeaker,
+            subtitle: l10n.alsoRingOnSpeakerDescription,
+            switchValue: speakerCopy.value == true,
+            onSwitch: (v) => speakerCopy.setValue(context, v),
           ),
           _row(
             title: l10n.vibrationSetting,

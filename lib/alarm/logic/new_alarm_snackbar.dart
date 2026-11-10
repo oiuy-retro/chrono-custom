@@ -45,7 +45,8 @@ String getShortRemainingAlarmTimeText(BuildContext context, Alarm alarm) {
     int hours = etaNextAlarm.inHours;
     int minutes = etaNextAlarm.inMinutes % 60;
     if (minutes > 0) {
-      etaText = '${localizations.shortHoursString(hours)} ${localizations.shortMinutesString(minutes)}';
+      etaText =
+          '${localizations.shortHoursString(hours)} ${localizations.shortMinutesString(minutes)}';
     } else {
       etaText = localizations.shortHoursString(hours);
     }

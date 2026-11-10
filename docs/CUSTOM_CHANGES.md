@@ -80,12 +80,31 @@ This replaces the earlier mix of Samsung and Apple styles.
 - `lib/alarm/screens/alarm_editor_screen.dart`: the Alarm name field is underlined with no fill.
 - `lib/l10n/app_en.arb`: `themeSetting`, `themeSettingDescription`, `themeSystemDefault`, `themeLight`, `themeDark`.
 
+## Phone speaker copy and random start point (pre-release 5)
+
+- New local Flutter plugin `plugins/speaker_output` (added to `pubspec.yaml` as a path dependency). It is a plugin rather than code in `MainActivity` because alarms ring in a background Flutter engine started by the alarm manager, and only plugins are registered there automatically.
+  - Kotlin side (`SpeakerOutputPlugin.kt`, method channel `com.oiuyretro.chrono/speaker_output`): `status` reports whether a Bluetooth output (A2DP, SCO, hearing aid, LE audio headset, speaker or broadcast) is connected, using `AudioManager.getDevices` (Android 6+). `start` plays the sound with an Android `MediaPlayer` using alarm usage, looping, seeks to the given start point and only then starts and replies. On Android 9+ it calls `setPreferredDevice` with the built-in speaker. `setVolume`, `pause` and `stop` control it. An `AudioDeviceCallback` tells Dart when the last Bluetooth output goes away. The player is released when stopped or when the engine is detached.
+  - Dart side (`lib/speaker_output.dart`): wraps the channel; every call is a no-op that returns false if the native side is missing.
+- `lib/audio/types/ringtone_player.dart`: when the alarm has "Also ring on phone speaker" on and Bluetooth output is connected, the main just_audio player uses media usage (Android sends that to the Bluetooth device) and the speaker copy is started first at the same start point; the main player starts right after it reports playing. Volume changes (initial volume, rising volume steps, the lower volume while doing a dismiss task) go to both. `stop()` and `pause()` stop the speaker copy, and starting a timer or another alarm stops it first. When Bluetooth disconnects mid-alarm the main player is set to volume 0 and the speaker copy continues. Rising volume steps now carry a play counter so steps from an earlier sound cannot change a later one, and the initial volume no longer cancels them (an upstream bug).
+- New `lib/audio/logic/random_start.dart`: `randomStartPosition()` returns 0 for unknown lengths and sounds under 20 seconds, otherwise a random point up to the earlier of "15 seconds before the end" and "80% of the length". It replaces upstream's "any point from 0 to 99%". The length comes from just_audio when the sound is loaded, so it works for system ringtones (content URIs), the built-in default sound and files the user added; for a folder melody the randomly chosen file is used for both copies.
+- `lib/alarm/data/alarm_settings_schema.dart`: `start_melody_at_random_pos` defaults to on; new `also_ring_on_phone_speaker` (off) in the Sound group. Saved alarms without it load with it off. `lib/alarm/types/alarm.dart`: `alsoRingOnPhoneSpeaker` getter.
+- New `lib/alarm/logic/alarm_defaults_migration.dart`: `migrateAlarmDefaults()`, run once after settings load (GetStorage flag `chrono_custom_random_start_default_v1`), turns on random start in Settings, Alarm, Default Settings, which is the template for new alarms.
+- `lib/alarm/screens/alarm_editor_screen.dart`: two switch rows under Alarm sound.
+- `lib/l10n/app_en.arb`: `startMelodyAtRandomPos` is now "Start at random point" with a new description; new `alsoRingOnSpeaker` and `alsoRingOnSpeakerDescription`.
+
+How routing behaves on different Android versions:
+- Android 9 and newer: the speaker copy asks for the built-in speaker explicitly. Phone makers' audio policies can still override this; it has not been tested on a phone.
+- Android 6 to 8.1: there is no way to pick the speaker for a `MediaPlayer`, so the speaker copy only relies on alarm usage, which Android normally plays on the speaker (and on some phones also on the Bluetooth device).
+- Android 5: Bluetooth output cannot be detected, so only one copy plays.
+- If Bluetooth connects after the alarm started, nothing changes until the alarm rings again.
+- The app has no automatic ring timeout; the alarm rings until it is dismissed or snoozed, and both copies stop then.
+
 ## Packaging and build
 - `android/app/build.gradle`: application ID `com.oiuyretro.chrono`; app name "Chrono Custom"; release signing from `CHRONO_KEYSTORE_PROPERTIES` or `android/keystore.properties`, unsigned if neither exists. The Kotlin package and method channel names are still `com.vicolo.chrono`; they are internal and do not affect installation.
 - `android/keystore.properties.example`: template for the signing file.
 - `android/settings.gradle`: adds `com.android.tools:r8:8.3.37` to the settings build script classpath. The D8 bundled with Android Gradle Plugin 7.4.2 fails with a NullPointerException on libraries compiled with JDK 21 (AndroidX lifecycle 2.8.x, tsbackgroundfetch 4.1.1).
 - `android/gradle.properties`: Gradle heap raised from 1.5 GB to 4 GB.
-- `pubspec.yaml`: version `0.6.0-custom.1+31`; `path_provider_platform_interface` and `plugin_platform_interface` added as dev dependencies for the screenshot test.
+- `pubspec.yaml`: version `0.6.0-custom.1+32`; `path_provider_platform_interface` and `plugin_platform_interface` added as dev dependencies for the screenshot test.
 - `.gitignore`: signing files and `test/screenshots/goldens/`.
 
 ## Tests
@@ -93,4 +112,5 @@ This replaces the earlier mix of Samsung and Apple styles.
 - New `test/alarm/logic/day_chips_test.dart` (day button rules and the vibration setting) and `test/stopwatch/stopwatch_format_test.dart`.
 - The screenshot test also renders the stopwatch, timer and world clock, and dark versions of the main screens, settings and the ringing screen.
 - New `test/alarm/logic/alarm_sort_test.dart` and `test/theme/theme_dark_test.dart`.
+- New `test/audio/random_start_test.dart`: start point limits, new defaults, the one-time template change, and the speaker channel calls.
 - New `test/system/reliability_test.dart`: item list per Android version and maker, Samsung title, and the Fix all order.

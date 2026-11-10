@@ -295,9 +295,9 @@
   "@settingGroupMore": {},
   "melodySetting": "Melody",
   "@melodySetting": {},
-  "startMelodyAtRandomPos": "Random position",
+  "startMelodyAtRandomPos": "Start at random point",
   "@startMelodyAtRandomPos": {},
-  "startMelodyAtRandomPosDescription": "Melody will start at a random position",
+  "startMelodyAtRandomPosDescription": "Plays from a random point in the sound, not near the end",
   "@startMelodyAtRandomPosDescription": {},
   "vibrationSetting": "Vibration",
   "@vibrationSetting": {},
@@ -902,5 +902,9 @@
   "themeLight": "Light",
   "@themeLight": {},
   "themeDark": "Dark",
-  "@themeDark": {}
+  "@themeDark": {},
+  "alsoRingOnSpeaker": "Also ring on phone speaker",
+  "@alsoRingOnSpeaker": {},
+  "alsoRingOnSpeakerDescription": "When Bluetooth audio is connected, also plays on the phone's speaker",
+  "@alsoRingOnSpeakerDescription": {}
 }

@@ -81,6 +81,8 @@ class Alarm extends CustomizableListItem {
   FileItem get ringtone => _settings.getSetting("Melody").value;
   bool get shouldStartMelodyAtRandomPos =>
       _settings.getSetting("start_melody_at_random_pos").value;
+  bool get alsoRingOnPhoneSpeaker =>
+      _settings.getSetting("also_ring_on_phone_speaker").value;
   bool get vibrate => _settings.getSetting("Vibration").value;
   double get volume => _settings.getSetting("Volume").value;
   double get volumeDuringTasks => _settings.getSetting("task_volume").value;

@@ -1,3 +1,4 @@
+import 'package:clock_app/alarm/logic/alarm_defaults_migration.dart';
 import 'package:clock_app/theme/logic/theme_migration.dart';
 import 'package:clock_app/alarm/logic/alarm_sort_default.dart';
 import 'dart:io';
@@ -94,4 +95,5 @@ Future<void> initializeSettings() async {
 
   await appSettings.load();
   await migrateThemeSettings();
+  await migrateAlarmDefaults();
 }

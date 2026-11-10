@@ -61,8 +61,9 @@ Future<void> createAlarmReminderNotification(
         showInCompactView: true,
         key: "alarm_skip",
         label: 'Skip alarm${tasksRequired ? " (Solve tasks)" : ""}',
-        actionType:
-            tasksRequired ? ActionType.Default : ActionType.SilentBackgroundAction,
+        actionType: tasksRequired
+            ? ActionType.Default
+            : ActionType.SilentBackgroundAction,
         autoDismissible: true,
       )
     ],
@@ -109,8 +110,9 @@ Future<void> createSnoozeNotification(int id, DateTime time) async {
         showInCompactView: true,
         key: "alarm_skip_snooze",
         label: 'Dismiss alarm${tasksRequired ? " (Solve tasks)" : ""}',
-        actionType:
-            tasksRequired ? ActionType.Default : ActionType.SilentBackgroundAction,
+        actionType: tasksRequired
+            ? ActionType.Default
+            : ActionType.SilentBackgroundAction,
         autoDismissible: true,
       )
     ],

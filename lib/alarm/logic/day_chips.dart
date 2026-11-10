@@ -9,9 +9,9 @@ import 'package:flutter/widgets.dart';
 /// settings. No new settings are stored: the chips set the schedule "Type"
 /// (Once, Daily or Weekly) and the "Week Days" toggle.
 
-ToggleSetting _weekDaysSetting(Alarm alarm) => alarm.settings
-    .getGroup("Schedule")
-    .getSetting("Week Days") as ToggleSetting;
+ToggleSetting _weekDaysSetting(Alarm alarm) =>
+    alarm.settings.getGroup("Schedule").getSetting("Week Days")
+        as ToggleSetting;
 
 SelectSetting _typeSetting(Alarm alarm) =>
     alarm.settings.getGroup("Schedule").getSetting("Type") as SelectSetting;
